@@ -1,4 +1,4 @@
-# Minitel - An easy to implement LAN protocol
+# Minitel - Layer 3
 
 ## Language
 Node - a device of some description on a Minitel network, ie a computer, server, microcontroller or drone.
