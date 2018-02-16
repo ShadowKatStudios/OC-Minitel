@@ -10,3 +10,8 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 ## Implementations
 ### OpenOS
 - [Reference implementation for OpenOS](OpenOS/etc/rc.d/minitel.lua)
+
+## Development and discussion
+Code and documentation is hosted in the [Github repository](https://github.com/XeonSquared/OC-Minitel).
+
+Discussion takes place in, among other places, the [#SKS IRC channel on EsperNet](irc://irc.esper.net/#SKS)
