@@ -14,6 +14,7 @@ Upon a node receiving a message addressed to itself, it should:
 4. Optional: Add the sender to the address cache if it isn't already in the cache
 5. Optional: If the packet is addressed to a different node, repeat the packet, preferably respecting the address cache
 
+If the packet is, for some reason invalid, simply drop the packet.
 ### Optional: Meshing
 If a message is not addressed to a node, and the node has not seen the packet ID before, the node should repeat it. Whether via the address in the cache or by broadcast, it should be passed on, and the hardware address added to the cache as the sender.
 
