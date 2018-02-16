@@ -41,3 +41,10 @@ Packets are made up of separated parts, as allowed by OpenComputers modems.
 - port: virtual port, number \< 65536
 - data: the actual packet data, or in the case of an acknowledgement packet, the original packet ID, string
 
+### Example exchange:
+
+Node bob sends a reliable packet to node alice, on port 44:  
+"asdsfghjkqwertyu", 1, "alice", "bob", 44, "Hello!"
+
+Node alice acknowledges node bob's packet:  
+"1234567890asdfgh", 2, "bob", "alice", 44, "asdsfghjkqwertyu"
