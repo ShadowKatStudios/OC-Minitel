@@ -41,6 +41,15 @@ Packets are made up of separated parts, as allowed by OpenComputers modems.
 - port: virtual port, number \< 65536
 - data: the actual packet data, or in the case of an acknowledgement packet, the original packet ID, string
 
+Strings in Minitel packets, with the exception of the data portion, have the following restrictions:
+
+- Maximum length of 255 characters
+- ASCII 0 through 31 are not allowed
+- ASCII 127 is not allowed
+- ASCII 128 and above (ie unicode) behavior is undefined and should be used with caution.
+
+The data part of the packet can contain any characters.
+
 ### Example exchange:
 
 Node bob sends a reliable packet to node alice, on port 44:  
