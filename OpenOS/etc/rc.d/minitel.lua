@@ -31,7 +31,8 @@ address {
  time last received
 }
 ]]--
-local rcache = {}
+local sroutes = {}
+local rcache = setmetatable({},{__index=sroutes})
 local rctime = 30
 
 --[[
@@ -210,4 +211,10 @@ end
 function set_port(sn)
  port = tonumber(sn) or 4096
  print("port = "..tostring(port))
+end
+function set_route(to,laddr,raddr)
+ sroutes[to] = {laddr,raddr,0}
+end
+function del_route(to)
+ sroutes[to] = nil
 end
