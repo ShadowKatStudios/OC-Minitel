@@ -43,6 +43,7 @@ Packets are made up of separated parts, as allowed by OpenComputers modems.
 
 Strings in Minitel packets, with the exception of the data portion, have the following restrictions:
 
+- Minimum length of 1 character
 - Maximum length of 255 characters
 - ASCII 0 through 31 are not allowed
 - ASCII 127 is not allowed
