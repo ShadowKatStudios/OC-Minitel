@@ -29,6 +29,18 @@ It is recommended to keep the data in the cache for 30 seconds or so, then drop 
 
 When sending a message, check the cache for the given destination. If there is a hardware address in the cache for the destination, send the message straight to that address. Otherwise, broadcast the message.
 
+### WIP, Optional: Broadcast address
+
+Packets addressed to the broadcast address (currently undecided) can optionally be received by all nodes.
+
+### WIP, Optional: Network status packets
+
+Currently undecided on specifics and taking input.
+
+Network status messages could be used to notify other nodes that a node has come online or is going offline, and other similar information.
+
+Requesting what nodes another node can talk to may also be an option.
+
 ## Packet Format
 Packets are made up of separated parts, as allowed by OpenComputers modems.
 
