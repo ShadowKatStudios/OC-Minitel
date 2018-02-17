@@ -113,12 +113,26 @@ end
 function net.listen(port)
  repeat
   _, from, rport, data = event.pull("net_msg")
- until rport == port
+ until rport == port and data == "openstream"
  local nport = math.random(net.minport,net.maxport)
  local sclose = net.genPacketID()
  net.rsend(from,rport,tostring(nport))
  net.rsend(from,nport,sclose)
  return socket(from,nport,sclose)
+end
+
+function net.flisten(port,listener)
+ local function helper(_,from,rport,data)
+  if rport == port and data == "openstream" then
+   local nport = math.random(net.minport,net.maxport)
+   local sclose = net.genPacketID()
+   net.rsend(from,rport,tostring(nport))
+   net.rsend(from,nport,sclose)
+   listener(socket(from,nport,sclose))
+  end
+ end
+ event.listen("net_msg",helper)
+ return helper
 end
 
 return net
