@@ -47,7 +47,9 @@ end
 -- socket stuff, layer 5?
 
 local function cwrite(self,data)
- net.send(self.addr,self.port,data)
+ if self.state == "open" then
+  net.send(self.addr,self.port,data)
+ end
 end
 local function cread(self,length)
  local rdata = ""
@@ -56,7 +58,7 @@ local function cread(self,length)
  return rdata
 end
 
-local function socket(addr,port) -- todo, add remote closing of sockets
+local function socket(addr,port,sclose) -- todo, add remote closing of sockets
  local conn = {}
  conn.addr,conn.port = addr,tonumber(port)
  conn.rbuffer = ""
@@ -65,13 +67,18 @@ local function socket(addr,port) -- todo, add remote closing of sockets
  conn.state = "open"
  local function listener(_,f,p,d)
   if f == conn.addr and p == conn.port then
-   conn.rbuffer = conn.rbuffer .. d
+   if d == sclose then
+    conn:close()
+   else
+    conn.rbuffer = conn.rbuffer .. d
+   end
   end
  end
  event.listen("net_msg",listener)
  function conn.close(self)
   event.ignore("net_msg",listener)
   conn.state = "closed"
+  net.rsend(addr,port,sclose)
  end
  return conn
 end
@@ -95,7 +102,12 @@ function net.open(to,port)
  if not est then
   return nil, "refused"
  end
- return socket(to,data,port)
+ data = tonumber(data)
+ sclose = ""
+ repeat
+  _,from,nport,sclose = event.pull("net_msg")
+ until from == to and nport == data
+ return socket(to,data,sclose)
 end
 
 function net.listen(port)
@@ -103,8 +115,10 @@ function net.listen(port)
   _, from, rport, data = event.pull("net_msg")
  until rport == port
  local nport = math.random(net.minport,net.maxport)
+ local sclose = net.genPacketID()
  net.rsend(from,rport,tostring(nport))
- return socket(from,nport,port)
+ net.rsend(from,nport,sclose)
+ return socket(from,nport,sclose)
 end
 
 return net
