@@ -7,6 +7,12 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 ### Layer 3
 [Layer 3](protocol-3.md) implements addressing, meshing and datagram transmission.
 
+### Layer 4
+[Layer 4](protocol-4.md) implements ordered message delivery
+
+### Layer 5
+[Layer 5](protocol-5.md) implements reliable, ordered, bidirectional streams.
+
 ## Implementations
 ### OpenOS
 - [Reference implementation for OpenOS](OpenOS/etc/rc.d/minitel.lua)
