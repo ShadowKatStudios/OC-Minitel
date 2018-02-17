@@ -151,8 +151,8 @@ function start()
  event.listen("modem_message",processPacket)
  print("Started packet listening daemon: "..tostring(processPacket))
  
- local function queuePacket(_,ptype,to,vport,data)
-  npID = genPacketID()
+ local function queuePacket(_,ptype,to,vport,data,npID)
+  npID = npID or genPacketID()
   pqueue[npID] = {ptype,to,vport,data,0,0}
   dprint(npID,table.unpack(pqueue[npID]))
  end
@@ -179,6 +179,7 @@ function start()
  timers[#timers+1]=event.timer(0,packetPusher,math.huge)
  print("Started packet pusher: "..tostring(timers[#timers]))
  
+ listeners["net_ack"]=dprint
  event.listen("net_ack",dprint)
 end
 
