@@ -62,6 +62,8 @@ Strings in Minitel packets, with the exception of the data portion, have the fol
 - ASCII 127 is not allowed
 - ASCII 128 and above (ie unicode) behavior is undefined and should be used with caution.
 
+The address part of the packet has a furthur limitatation, the tidle character `~`, ASCII 126, may not be used as an address of a node, but is allowed in the address part as a seperator for multicast.
+
 The data part of the packet can contain any characters.
 
 ### Example exchange:
