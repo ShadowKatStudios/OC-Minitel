@@ -18,6 +18,10 @@ If the packet is, for some reason invalid, simply drop the packet.
 ### Optional: Meshing
 If a message is not addressed to a node, and the node has not seen the packet ID before, the node should repeat it. Whether via the address in the cache or by broadcast, it should be passed on, and the hardware address added to the cache as the sender.
 
+#### Important (Non-Optional) Notes
+Broadcast packets MUST NOT be repeated, in order to keep them within the same layer 2 network, unless special precautions are taken.
+If a packet is multicast and you don't support multicast, then you SHOULD NOT repeat the packet.
+
 ### Optional: Address caching
 Each machine should keep a last known route cache. The exact format is up to the implementation, but it will need:
 
@@ -30,8 +34,20 @@ It is recommended to keep the data in the cache for 30 seconds or so, then drop 
 When sending a message, check the cache for the given destination. If there is a hardware address in the cache for the destination, send the message straight to that address. Otherwise, broadcast the message.
 
 ### Optional: Broadcast address
-
 Packets addressed to the broadcast address, an adress of an empty string, can optionally be received by all nodes om the same layer 2 network. While a node MAY forward a broadcast packet to other nodes, it SHOULD NOT, unless both sides of the forward are prepared to handle such a packet, to avoid it going around the entire layer 3 network.
+
+### Optional: Multicast
+A multicast packet has a specially formatted address part.  
+The address must be a list of valid addresses, seperated by the tilde character, `~`, ASCII 126.  
+For example, to send to nodes `a` and `b`, the address in the packet would be `a~b`.
+
+Each node should send multicasts as layer 2 broadcasts, unless it is known (using the address cache) that all layer 3 destination addresses have to be sent to or forwarded by one layer 2 address.
+
+When a multicast packet is forwarded, the addresses already seen SHOULD be removed from the packet when possible, using the address cache as a guide.
+
+The same address MUST NOT be repeated in a multicast destination, but the duplicate MAY be ignored and just considered one, but also MAY br dropped as an invalid packet. A duplicate address MUST NOT be considered as two packets with the same contents to the same address.
+
+A multicast packet SHOULD also be able to be broken up into multiple packets with the same contents (but they need different packet IDs!) with different addresses.
 
 ### WIP, Optional: Network status packets
 
