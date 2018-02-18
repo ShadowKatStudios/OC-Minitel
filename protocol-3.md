@@ -34,7 +34,7 @@ It is recommended to keep the data in the cache for 30 seconds or so, then drop 
 When sending a message, check the cache for the given destination. If there is a hardware address in the cache for the destination, send the message straight to that address. Otherwise, broadcast the message.
 
 ### Optional: Broadcast address
-Packets addressed to the broadcast address, an adress of an empty string, can optionally be received by all nodes om the same layer 2 network. While a node MAY forward a broadcast packet to other nodes, it SHOULD NOT, unless both sides of the forward are prepared to handle such a packet, to avoid it going around the entire layer 3 network.
+Packets addressed to the broadcast address, an adress of just the tilde character, `~`, ASCII 126, can optionally be received by all nodes om the same layer 2 network. While a node MAY forward a broadcast packet to other nodes, it SHOULD NOT, unless both sides of the forward are prepared to handle such a packet, to avoid it going around the entire layer 3 network.
 
 ### Optional: Multicast
 A multicast packet has a specially formatted address part.  
@@ -78,7 +78,8 @@ Strings in Minitel packets, with the exception of the data portion, have the fol
 - ASCII 127 is not allowed
 - ASCII 128 and above (ie unicode) behavior is undefined and should be used with caution.
 
-The address part of the packet has a furthur limitatation, the tidle character `~`, ASCII 126, may not be used as an address of a node, but is allowed in the address part as a seperator for multicast.
+The address part of the packet has a furthur limitatation, the tidle character `~`, ASCII 126, may not be used as an address of a node, but is allowed in the address part as a seperator for multicast.  
+An address of 0 length (an empty address) MUST be considered invalid and dropped.
 
 The data part of the packet can contain any characters.
 
