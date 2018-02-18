@@ -34,7 +34,7 @@ It is recommended to keep the data in the cache for 30 seconds or so, then drop 
 When sending a message, check the cache for the given destination. If there is a hardware address in the cache for the destination, send the message straight to that address. Otherwise, broadcast the message.
 
 ### Optional: Broadcast address
-Packets addressed to the broadcast address, an adress of just the tilde character, `~`, ASCII 126, can optionally be received by all nodes om the same layer 2 network. While a node MAY forward a broadcast packet to other nodes, it SHOULD NOT, unless both sides of the forward are prepared to handle such a packet, to avoid it going around the entire layer 3 network.
+Packets addressed to the broadcast address, an address of just the tilde character, `~`, ASCII 126, can optionally be received by all nodes of the same layer 2 network. While a node MAY forward a broadcast packet to other nodes, it SHOULD NOT, unless both sides of the forward are prepared to handle such a packet, to avoid it going around the entire layer 3 network.
 
 ### Optional: Multicast
 A multicast packet has a specially formatted address part.  
