@@ -136,6 +136,8 @@ function start()
     if packetType ~= 2 then
      computer.pushSignal("net_msg",sender,vport,data)
     end
+   else
+    sendPacket(packetID,packetType,dest,sender,vport,data)
    end
    if not rcache[sender] then
     dprint("rcache: "..sender..":", localModem,from,computer.uptime())
