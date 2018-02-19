@@ -20,29 +20,44 @@ function start()
   buffer=s:read(1024)
   local nl = buffer:find("\n")
   if nl then
-   local path=prefix .. "/" .. buffer:sub(1,nl-1)
+   local rt = buffer:sub(1,1)
+   local path=prefix .. "/" .. buffer:sub(2,nl-1)
    dprint(path)
+   if path:find("%.%./") then
+    s:write("f to pay respects")
+    s:close()
+    return
+   end
    if fs.exists(path) then
-    if fs.isDirectory(path) then 
-     if fs.exists(path.."/index") then
+    if rt == "t" then
+     if fs.isDirectory(path) then 
+      s:write("d")
+      if fs.exists(path.."/index") then
+       local f=io.open(path.."/index","rb")
+       s:write(f:read("*a"))
+       f:close()
+      end
+      local dbuffer = ""
+      for f in fs.list(path) do
+       dbuffer = dbuffer..f.."\n"
+       dprint(f)
+      end
+      s:write(dbuffer)
+      s:close()
+     else
+      s:write("y")
+      local f = io.open(path,"rb")
       s:write(f:read("*a"))
+      f:close()
+      s:close()
      end
-     local dbuffer = ""
-     for f in fs.list(path) do
-      dbuffer = dbuffer..f.."\n"
-      dprint(f)
-     end
-     s:write(dbuffer)
-     s:close()
     else
-     local f = io.open(path,"rb")
-     s:write(f:read("*a"))
-     f:close()
+     s:write(tostring(fs.size(path)))
      s:close()
     end
    else
     dprint("404")
-    s:write("file not found")
+    s:write("not found")
     s:close()
    end
   end

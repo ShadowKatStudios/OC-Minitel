@@ -12,7 +12,19 @@ if sep then
 end
 
 local socket = net.open(host,port)
-socket:write(path.."\n")
+socket:write("t"..path.."\n")
+local c = socket:read(1)
+repeat
+ c = socket:read(1)
+ os.sleep(0.5)
+until c ~= ""
+if c == "n" then 
+ print(path..": Not found.")
+elseif c == "f" then 
+ print("Failure: ")
+elseif c == "d" then
+ print("Directory listing for "..path)
+end
 repeat
  l = socket:read(1024)
  io.write(l)
