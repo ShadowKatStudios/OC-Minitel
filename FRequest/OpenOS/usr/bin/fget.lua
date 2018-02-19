@@ -7,14 +7,14 @@ local port = 70
 
 local sep = host:find(":")
 if sep then
- port=tonumber(host:sub(sep+1))
+ port=tonumber(host:sub(sep+1)) or port
  host=host:sub(1,sep-1)
 end
 
-local s = net.open(host,port)
-s:write(path.."\n")
+local socket = net.open(host,port)
+socket:write(path.."\n")
 repeat
- l = s:read(1024)
+ l = socket:read(1024)
  io.write(l)
  os.sleep(0.5)
-until s.state == "closed" and l == ""
+until socket.state == "closed" and l == ""
