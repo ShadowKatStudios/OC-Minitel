@@ -22,6 +22,7 @@ local dbug = false
 local modems = {}
 local port = 4096
 local retry = 30
+local route = true
 
 --[[
 LKR format:
@@ -136,14 +137,16 @@ function start()
     if packetType ~= 2 then
      computer.pushSignal("net_msg",sender,vport,data)
     end
-   else
+   elseif dest:sub(1,1) == "~" then -- broadcasts start with ~
+    computer.pushSignal("net_broadcast",sender,vport,data)
+   elseif route then -- repeat packets if route is enabled
     sendPacket(packetID,packetType,dest,sender,vport,data)
    end
-   if not rcache[sender] then
+   if not rcache[sender] then -- add the sender to the rcache
     dprint("rcache: "..sender..":", localModem,from,computer.uptime())
     rcache[sender] = {localModem,from,computer.uptime()+rctime}
    end
-   if not pcache[packetID] then
+   if not pcache[packetID] then -- add the packet ID to the pcache
     pcache[packetID] = computer.uptime()+pctime
    end
   end
