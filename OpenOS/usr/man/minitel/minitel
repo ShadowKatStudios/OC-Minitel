@@ -1,0 +1,20 @@
+# Minitel - Minitel daemon for OpenOS
+
+The Minitel daemon handles receiving and relaying Minitel packets.
+
+## Configuration
+
+The minitel daemon does not keep a configuration file, so settings have to be set every boot.
+
+To change a setting, one invokes:
+
+`rc minitel set_<option> value`
+
+### Available settings
+
+ - port: the physical port the protocol runs over
+ - pctime: the amount of time packets are kept in the packet cache
+ - retry: how many seconds between resend attempts of reliable packets
+ - rctime: How long items are kept in the routing cache
+
+In addition, one can invoke `rc minitel debug` to get large amounts of debug output, rc `minitel set_route <local_modem> <remote_modem>` to add a static route, and `rc minitel del_route` to delete a static route.
