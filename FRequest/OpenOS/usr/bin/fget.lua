@@ -2,14 +2,12 @@ local net = require "net"
 local event = require "event"
 
 local tArgs = {...}
-local host, path = tArgs[1], tArgs[2]
+local address, path = tArgs[1], tArgs[2]
 local port = 70
 
-local sep = host:find(":")
-if sep then
- port=tonumber(host:sub(sep+1)) or port
- host=host:sub(1,sep-1)
-end
+local host,nport = host:match("(.+):(%d+)")
+port = nport or port
+host = host or address
 
 local socket = net.open(host,port)
 socket:write("t"..path.."\n")
