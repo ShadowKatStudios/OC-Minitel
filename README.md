@@ -17,6 +17,11 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 ### OpenOS
 - [Reference implementation for OpenOS](OpenOS/README.md)
 
+## Application-layer protocols
+This repository also contains a number of implementations and specifications for application-layer protocols using Minitel.
+
+- [FRequest](FRequest/FRequest-protocol.md)
+
 ## Development and discussion
 Code and documentation is hosted in the [Github repository](https://github.com/XeonSquared/OC-Minitel).
 
