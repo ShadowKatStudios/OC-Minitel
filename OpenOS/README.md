@@ -6,6 +6,12 @@ This package includes the Minitel daemon, in etc/rc.d/minitel.lua, and the net l
 
 ### Installation
 
+#### With OPPM
+
+1. Run `oppm install minitel`
+
+#### Manual
+
 1. Place minitel.lua into /etc/rc.d
 2. Place your hostname into /etc/hostname
 3. Run rc minitel enable; rc minitel start
