@@ -27,9 +27,9 @@ function start()
      tw[#tw+1] = w
     end
     if tw[1] == "To:" then
-     to=tw[2]
+     to=to or tw[2]
     elseif tw[1] == "From:" then
-     from=tw[2]
+     from=from or tw[2]
     end
     to=to:match("(.+)@"..hostname) or to
    end
