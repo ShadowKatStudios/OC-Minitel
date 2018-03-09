@@ -1,0 +1,18 @@
+NAME
+  mmail-send - send mmail-compatible messages from the command line
+
+SYNOPSIS
+  mmail-send [TO] [FROM] [SUBJECT] [PATH]
+
+DESCRIPTION
+  `mmail-send` sends mail over the Minitel network to MMail-compatible mail servers.
+
+EXAMPLES
+  mmail-send alice@host bob "Example message" /usr/man/mmail-send
+    Sends the user alice a message addressed from bob, with subject 'Example message', containing the contents of this manual page.
+
+  mmail-send alice@host
+    Sends the user alice a message, and prompts for all the other information.
+  
+  mmail-send
+    Prompts for all required information (to, from, subject, message)
