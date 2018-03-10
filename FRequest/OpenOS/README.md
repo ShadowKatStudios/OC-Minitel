@@ -1,4 +1,4 @@
-# Minitel for OpenOS
+# FRequest for OpenOS
 
 This package includes the FRequest daemon, in etc/rc.d/frequest.lua, and the fget FRequest client, in usr/bin/fget.lua.
 
