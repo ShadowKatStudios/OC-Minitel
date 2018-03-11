@@ -52,4 +52,4 @@ To change a setting, one invokes:
 - port: the minitel port the FRequest server runs on
 - path: the root path of the server
 
-In addition, one can invoke *rc fserv debug* to get large amounts of debug output.
+In addition, one can invoke `rc fserv debug` to get large amounts of debug output.
