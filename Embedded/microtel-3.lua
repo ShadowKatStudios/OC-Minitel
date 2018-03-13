@@ -78,7 +78,7 @@ function computer.pullSignal(t)
    end
    if tev[7] == 2 then
     pqueue[tev[11]] = nil
-    computer.pushSignal("net_ack",data)
+    computer.pushSignal("net_ack",tev[11])
    end
    if tev[7] ~= 2 then
     computer.pushSignal("net_msg",tev[9],tev[10],tev[11])
