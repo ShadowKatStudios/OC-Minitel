@@ -5,6 +5,12 @@ sed -i -e 's/pcache/PC/g' microtel-3-mini.lua
 sed -i -e 's/rcache/RC/g' microtel-3-mini.lua
 sed -i -e 's/pqueue/pQ/g' microtel-3-mini.lua
 sed -i -e 's/modems/M/g' microtel-3-mini.lua
+sed -i -e 's/packetID/pID/g' microtel-3-mini.lua
+sed -i -e 's/packetType/pT/g' microtel-3-mini.lua
+sed -i -e 's/dest/D/g' microtel-3-mini.lua
+sed -i -e 's/sender/S/g' microtel-3-mini.lua
+sed -i -e 's/vport/vP/g' microtel-3-mini.lua
+sed -i -e 's/data/dA/g' microtel-3-mini.lua
 sed -i -e 's/genPacketID/gP/g' microtel-3-mini.lua
 sed -i -e 's/sendPacket/sP/g' microtel-3-mini.lua
 sed -i -e 's/pruneCache/pC/g' microtel-3-mini.lua
@@ -12,7 +18,8 @@ sed -i -e 's/checkPCache/cPC/g' microtel-3-mini.lua
 sed -i -e 's/packetPusher/pP/g' microtel-3-mini.lua
 sed -i -e 's/component.invoke/cI/g' microtel-3-mini.lua
 sed -i -e 's/computer.uptime/cU/g' microtel-3-mini.lua
-sed -i -e 's/--subhere/local cI,cU = component.invoke,computer.uptime/g' microtel-3-mini.lua
+sed -i -e 's/computer.pushSignal/cPS/g' microtel-3-mini.lua
+sed -i -e 's/--subhere/local cI,cU,cPS = component.invoke,computer.uptime,computer.pushSignal/g' microtel-3-mini.lua
 lua strip.lua microtel-3-mini.lua microtel-3-mini.lua
 
 #microtel-4.lua

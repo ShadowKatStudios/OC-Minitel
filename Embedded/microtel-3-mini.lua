@@ -7,7 +7,7 @@ net.pctime=30
 net.retry=30
 do
 local rcpe,PC,RC,pQ,M=computer.pullSignal,{},{},{},{}
-local cI,cU=component.invoke,computer.uptime
+local cI,cU,cPS=component.invoke,computer.uptime,computer.pushSignal
 for a,t in component.list("modem") do
 M[#M+1]=component.proxy(a)
 M[#M].open(net.port)
@@ -19,12 +19,12 @@ npID=npID .. string.char(math.random(32,126))
 end
 return npID
 end
-local function sP(packetID,packetType,dest,sender,vport,data)
-if RC[dest] then
-cI(RC[dest][1],"send",RC[dest][2],net.port,packetID,packetType,dest,sender,vport,data)
+local function sP(pID,pT,D,S,vP,dA)
+if RC[D] then
+cI(RC[D][1],"send",RC[D][2],net.port,pID,pT,D,S,vP,dA)
 else
 for k,v in pairs(M) do
-v.broadcast(net.port,packetID,packetType,dest,sender,vport,data)
+v.broadcast(net.port,pID,pT,D,S,vP,dA)
 end
 end
 end
@@ -40,9 +40,9 @@ PC[k]=nil
 end
 end
 end
-local function cPC(packetID)
+local function cPC(pID)
 for k,v in pairs(PC) do
-if k==packetID then return true end
+if k==pID then return true end
 end
 return false
 end
@@ -70,10 +70,10 @@ sP(gP(),2,tev[9],net.hostname,tev[10],tev[6])
 end
 if tev[7]==2 then
 pQ[tev[11]]=nil
-computer.pushSignal("net_ack",data)
+cPS("net_ack",tev[11])
 end
 if tev[7]~=2 then
-computer.pushSignal("net_msg",tev[9],tev[10],tev[11])
+cPS("net_msg",tev[9],tev[10],tev[11])
 end
 else
 sP(tev[6],tev[7],tev[8],tev[9],tev[10],tev[11])
@@ -87,13 +87,13 @@ end
 end
 return table.unpack(tev)
 end
-function net.usend(to,vport,data,npID)
+function net.usend(to,vP,dA,npID)
 npID=npID or gP()
-pQ[npID]={0,to,vport,data,0,0}
+pQ[npID]={0,to,vP,dA,0,0}
 end
-function net.rsend(to,vport,data,npID)
+function net.rsend(to,vP,dA,npID)
 npID=npID or gP()
-pQ[npID]={1,to,vport,data,0,0}
+pQ[npID]={1,to,vP,dA,0,0}
 repeat
 local te={computer.pullSignal()}
 until te[1]=="net_ack" and te[2]==npID
