@@ -1,7 +1,6 @@
 _G.net = {}
 net.port = 4096
 net.hostname = computer.address():sub(1,8)
-net.hostname = "micro"
 net.debug = false
 net.rctime = 30
 net.pctime = 30
@@ -81,7 +80,7 @@ function computer.pullSignal(t)
     pqueue[tev[11]] = nil
     computer.pushSignal("net_ack",data)
    end
-   if packetType ~= 2 then
+   if tev[7] ~= 2 then
     computer.pushSignal("net_msg",tev[9],tev[10],tev[11])
    end
   else
@@ -94,15 +93,19 @@ function computer.pullSignal(t)
    pcache[tev[6]] = computer.uptime()+net.pctime
   end
  end
+ return table.unpack(tev)
 end
 
-function net.send(ptype,to,vport,data,npID)
+function net.usend(to,vport,data,npID)
  npID = npID or genPacketID()
- pqueue[npID] = {ptype,to,vport,data,0,0}
+ pqueue[npID] = {0,to,vport,data,0,0}
+end
+function net.rsend(to,vport,data,npID)
+ npID = npID or genPacketID()
+ pqueue[npID] = {1,to,vport,data,0,0}
+ repeat
+  local te={computer.pullSignal()}
+ until te[1] == "net_ack" and te[2] == npID
 end
 
-end
-
-while true do
- computer.pullSignal()
 end
