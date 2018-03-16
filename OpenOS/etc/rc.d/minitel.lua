@@ -88,9 +88,11 @@ function start()
  
  local function sendPacket(packetID,packetType,dest,sender,vport,data)
   if rcache[dest] then
+   dprint("Cached", rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
    if component.type(rcache[dest][1]) == "modem" then
-    dprint("Cached", rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
     component.invoke(rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
+   elseif component.type(rcache[dest][1]) == "tunnel" then
+    component.invoke(rcache[dest][1],"send",packetID,packetType,dest,sender,vport,data)
    end
   else
    dprint("Not cached", port,packetID,packetType,dest,sender,vport,data)
