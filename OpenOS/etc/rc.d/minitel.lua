@@ -74,6 +74,9 @@ function start()
   v.open(port)
   print("Opened port "..port.." on "..v.address)
  end
+ for a,t in component.list("tunnel") do
+  modems[#modems+1] = component.proxy(a)
+ end
  
  local function genPacketID()
   local npID = ""
@@ -85,12 +88,18 @@ function start()
  
  local function sendPacket(packetID,packetType,dest,sender,vport,data)
   if rcache[dest] then
-   dprint("Cached", rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
-   component.invoke(rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
+   if component.type(rcache[dest][1]) == "modem" then
+    dprint("Cached", rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
+    component.invoke(rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
+   end
   else
    dprint("Not cached", port,packetID,packetType,dest,sender,vport,data)
    for k,v in pairs(modems) do
-    v.broadcast(port,packetID,packetType,dest,sender,vport,data)
+    if v.type == "modem" then
+     v.broadcast(port,packetID,packetType,dest,sender,vport,data)
+    elseif v.type == "tunnel" then
+     v.send(packetID,packetType,dest,sender,vport,data)
+    end
    end
   end
  end
@@ -122,7 +131,7 @@ function start()
  
  local function processPacket(_,localModem,from,pport,_,packetID,packetType,dest,sender,vport,data)
   pruneCache()
-  if pport == port then
+  if pport == port or pport == 0 then -- for linked cards
    dprint(port,vport,packetType,dest)
    if checkPCache(packetID) then return end
    if dest == hostname then
