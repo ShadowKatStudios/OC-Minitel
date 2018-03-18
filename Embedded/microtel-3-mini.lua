@@ -1,6 +1,6 @@
 _G.net={}
 do
-local M,packetQueue,pC,rC,C={},{},{},{},computer
+local M,pQ,pC,rC,C={},{},{},{},computer
 net.port,net.hostname,net.route=4096,C.address():sub(1,8),true
 for a in component.list("modem") do
 M[a]=component.proxy(a)
@@ -25,7 +25,7 @@ end
 end
 function net.send(T,vP,D,pT,pID)
 pT,pID=pT or 1,pID or gP()
-packetQueue[pID]={pT,T,vP,D,0}
+pQ[pID]={pT,T,vP,D,0}
 sP(pID,pT,T,vP,D)
 end
 local function cC(pID)
@@ -58,14 +58,14 @@ if eT[7]==1 then
 sP(gP(),2,eT[9],eT[10],eT[6])
 end
 else
-packetQueue[eT[11]]=nil
+pQ[eT[11]]=nil
 end
 elseif net.route and cC(eT[6]) then
 sP(eT[6],eT[7],eT[8],eT[9],eT[10],eT[11])
 end
 pC[eT[6]]=C.uptime()
 end
-for k,v in pairs(packetQueue) do
+for k,v in pairs(pQ) do
 if C.uptime()>v[5] then
 sP(k,table.unpack(v))
 v[5]=C.uptime()+30

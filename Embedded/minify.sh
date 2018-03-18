@@ -15,6 +15,7 @@ sed -i -e 's/packetCache/pC/g' microtel-3-mini.lua
 sed -i -e 's/checkCache/cC/g' microtel-3-mini.lua
 sed -i -e 's/routeCache/rC/g' microtel-3-mini.lua
 sed -i -e 's/realComputerPullSignal/rCPE/g' microtel-3-mini.lua
+sed -i -e 's/packetQueue/pQ/g' microtel-3-mini.lua
 sed -i -e 's/computer/C/g' microtel-3-mini.lua
 sed -i -e 's/NOTCOMPUTER/computer/g' microtel-3-mini.lua
 lua strip.lua microtel-3-mini.lua microtel-3-mini.lua
