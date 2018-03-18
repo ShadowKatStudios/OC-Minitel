@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #microtel-3.lua
 cp microtel-3.lua microtel-3-mini.lua
-sed -i -e 's/eventTab/eT/g' microtel-3-mini.lua
+sed -i -e 's/eventTab/Z/g' microtel-3-mini.lua
 sed -i -e 's/modems/M/g' microtel-3-mini.lua
 sed -i -e 's/qPacket/qP/g' microtel-3-mini.lua
 sed -i -e 's/packetID/pID/g' microtel-3-mini.lua
@@ -17,7 +17,9 @@ sed -i -e 's/routeCache/rC/g' microtel-3-mini.lua
 sed -i -e 's/realComputerPullSignal/rCPE/g' microtel-3-mini.lua
 sed -i -e 's/packetQueue/pQ/g' microtel-3-mini.lua
 sed -i -e 's/computer/C/g' microtel-3-mini.lua
-sed -i -e 's/NOTCOMPUTER/computer/g' microtel-3-mini.lua
+sed -i -e 's/C.uptime/U/g' microtel-3-mini.lua
+sed -i -e 's/COMPUTER/computer/g' microtel-3-mini.lua
+sed -i -e 's/UPTIME/C.uptime/g' microtel-3-mini.lua
 lua strip.lua microtel-3-mini.lua microtel-3-mini.lua
 
 #microtel-4.lua

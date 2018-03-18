@@ -1,8 +1,8 @@
 _G.net={}
 
 do
-local modems,packetQueue,packetCache,routeCache,C = {},{},{},{},NOTCOMPUTER
-net.port,net.hostname,net.route=4096,computer.address():sub(1,8),true
+local modems,packetQueue,packetCache,routeCache,C = {},{},{},{},COMPUTER
+net.port,net.hostname,net.route,U=4096,computer.address():sub(1,8),true,UPTIME
 
 for a in component.list("modem") do
  modems[a] = component.proxy(a)

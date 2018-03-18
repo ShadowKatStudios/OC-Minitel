@@ -1,7 +1,7 @@
 _G.net={}
 do
 local M,pQ,pC,rC,C={},{},{},{},computer
-net.port,net.hostname,net.route=4096,C.address():sub(1,8),true
+net.port,net.hostname,net.route,U=4096,C.address():sub(1,8),true,C.uptime
 for a in component.list("modem") do
 M[a]=component.proxy(a)
 M[a].open(net.port)
@@ -14,7 +14,7 @@ end
 return pID
 end
 local function sP(pID,pT,T,vP,D)
-pC[pID]=C.uptime()
+pC[pID]=U()
 if rC[T] then
 M[rC[T][1]].send(rC[T][2],net.port,pID,pT,T,net.hostname,vP,D)
 else
@@ -38,39 +38,39 @@ return true
 end
 local rCPE=C.pullSignal
 function C.pullSignal(t)
-local eT={rCPE(t)}
+local Z={rCPE(t)}
 for k,v in pairs(pC) do
-if C.uptime()>v+30 then
+if U()>v+30 then
 pC[k]=nil
 end
 end
 for k,v in pairs(rC) do
-if C.uptime()>v[3]+30 then
+if U()>v[3]+30 then
 rC[k]=nil
 end
 end
-if eT[1]=="modem_message" and (eT[4]==net.port or eT[4]==0) and cC(eT[6]) then
-rC[eT[9]]={eT[2],eT[3],C.uptime()}
-if eT[8]==net.hostname then
-if eT[7]~=2 then
-C.pushSignal("net_msg",eT[9],eT[10],eT[11])
-if eT[7]==1 then
-sP(gP(),2,eT[9],eT[10],eT[6])
+if Z[1]=="modem_message" and (Z[4]==net.port or Z[4]==0) and cC(Z[6]) then
+rC[Z[9]]={Z[2],Z[3],U()}
+if Z[8]==net.hostname then
+if Z[7]~=2 then
+C.pushSignal("net_msg",Z[9],Z[10],Z[11])
+if Z[7]==1 then
+sP(gP(),2,Z[9],Z[10],Z[6])
 end
 else
-pQ[eT[11]]=nil
+pQ[Z[11]]=nil
 end
-elseif net.route and cC(eT[6]) then
-sP(eT[6],eT[7],eT[8],eT[9],eT[10],eT[11])
+elseif net.route and cC(Z[6]) then
+sP(Z[6],Z[7],Z[8],Z[9],Z[10],Z[11])
 end
-pC[eT[6]]=C.uptime()
+pC[Z[6]]=U()
 end
 for k,v in pairs(pQ) do
-if C.uptime()>v[5] then
+if U()>v[5] then
 sP(k,table.unpack(v))
-v[5]=C.uptime()+30
+v[5]=U()+30
 end
 end
-return table.unpack(eT)
+return table.unpack(Z)
 end
 end
