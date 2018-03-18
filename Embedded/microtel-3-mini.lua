@@ -1,101 +1,76 @@
 _G.net={}
-net.port=4096
-net.hostname=computer.address():sub(1,8)
-net.debug=false
-net.rctime=30
-net.pctime=30
-net.retry=30
 do
-local rcpe,PC,RC,pQ,M=computer.pullSignal,{},{},{},{}
-local cI,cU,cPS=component.invoke,computer.uptime,computer.pushSignal
-for a,t in component.list("modem") do
-M[#M+1]=component.proxy(a)
-M[#M].open(net.port)
+local M,packetQueue,pC,rC,C={},{},{},{},computer
+net.port,net.hostname,net.route=4096,C.address():sub(1,8),true
+for a in component.list("modem") do
+M[a]=component.proxy(a)
+M[a].open(net.port)
 end
 local function gP()
-local npID=""
+local pID=""
 for i=1,16 do
-npID=npID .. string.char(math.random(32,126))
+pID=pID .. string.char(math.random(32,126))
 end
-return npID
+return pID
 end
-local function sP(pID,pT,D,S,vP,dA)
-if RC[D] then
-cI(RC[D][1],"send",RC[D][2],net.port,pID,pT,D,S,vP,dA)
+local function sP(pID,pT,T,vP,D)
+pC[pID]=C.uptime()
+if rC[T] then
+M[rC[T][1]].send(rC[T][2],net.port,pID,pT,T,net.hostname,vP,D)
 else
 for k,v in pairs(M) do
-v.broadcast(net.port,pID,pT,D,S,vP,dA)
+v.broadcast(net.port,pID,pT,T,net.hostname,vP,D)
 end
 end
 end
-local function pC()
-for k,v in pairs(RC) do
-if v[3]<cU() then
-RC[k]=nil
+function net.send(T,vP,D,pT,pID)
+pT,pID=pT or 1,pID or gP()
+packetQueue[pID]={pT,T,vP,D,0}
+sP(pID,pT,T,vP,D)
 end
-end
-for k,v in pairs(PC) do
-if v<cU() then
-PC[k]=nil
-end
-end
-end
-local function cPC(pID)
-for k,v in pairs(PC) do
-if k==pID then return true end
-end
+local function cC(pID)
+for k,v in pairs(pC) do
+if k==pID then
 return false
 end
-local function pP()
-for k,v in pairs(pQ) do
-if v[5]<cU() then
-sP(k,v[1],v[2],net.hostname,v[3],v[4])
-if v[1]~=1 or v[6]==255 then
-pQ[k]=nil
-else
-pQ[k][5]=cU()+net.retry
-pQ[k][6]=pQ[k][6]+1
+end
+return true
+end
+local rCPE=C.pullSignal
+function C.pullSignal(t)
+local eT={rCPE(t)}
+for k,v in pairs(pC) do
+if C.uptime()>v+30 then
+pC[k]=nil
 end
 end
+for k,v in pairs(rC) do
+if C.uptime()>v[3]+30 then
+rC[k]=nil
 end
 end
-function computer.pullSignal(t)
-pC()
-pP()
-local tev={rcpe(t)}
-if tev[1]=="modem_message" and tev[4]==net.port and not cPC(tev[6]) then
-if tev[8]==net.hostname then
-if tev[7]==1 then
-sP(gP(),2,tev[9],net.hostname,tev[10],tev[6])
-end
-if tev[7]==2 then
-pQ[tev[11]]=nil
-cPS("net_ack",tev[11])
-end
-if tev[7]~=2 then
-cPS("net_msg",tev[9],tev[10],tev[11])
+if eT[1]=="modem_message" and (eT[4]==net.port or eT[4]==0) and cC(eT[6]) then
+rC[eT[9]]={eT[2],eT[3],C.uptime()}
+if eT[8]==net.hostname then
+if eT[7]~=2 then
+C.pushSignal("net_msg",eT[9],eT[10],eT[11])
+if eT[7]==1 then
+sP(gP(),2,eT[9],eT[10],eT[6])
 end
 else
-sP(tev[6],tev[7],tev[8],tev[9],tev[10],tev[11])
+packetQueue[eT[11]]=nil
 end
-if not RC[tev[9]] then
-RC[tev[9]]={tev[2],tev[3],cU()+net.rctime}
+elseif net.route and cC(eT[6]) then
+sP(eT[6],eT[7],eT[8],eT[9],eT[10],eT[11])
 end
-if not PC[tev[6]] then
-PC[tev[6]]=cU()+net.pctime
+pC[eT[6]]=C.uptime()
+end
+for k,v in pairs(packetQueue) do
+if C.uptime()>v[5] then
+sP(k,table.unpack(v))
+v[5]=C.uptime()+30
 end
 end
-return table.unpack(tev)
-end
-function net.usend(to,vP,dA,npID)
-npID=npID or gP()
-pQ[npID]={0,to,vP,dA,0,0}
-end
-function net.rsend(to,vP,dA,npID)
-npID=npID or gP()
-pQ[npID]={1,to,vP,dA,0,0}
-repeat
-local te={computer.pullSignal()}
-until te[1]=="net_ack" and te[2]==npID
+return table.unpack(eT)
 end
 end
