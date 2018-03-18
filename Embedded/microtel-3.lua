@@ -2,7 +2,7 @@ _G.net={}
 
 do
 local modems,packetQueue,packetCache,routeCache,C,Y = {},{},{},{},COMPUTER,UNPACK
-net.port,net.hostname,net.route,U=4096,computer.address():sub(1,8),true,UPTIME
+net.port,net.hostname,net.route,net.hook,U=4096,computer.address():sub(1,8),true,{},UPTIME
 
 for a in component.list("modem") do
  modems[a] = component.proxy(a)
@@ -46,6 +46,9 @@ end
 local realComputerPullSignal = computer.pullSignal
 function computer.pullSignal(t)
  local eventTab = {realComputerPullSignal(t)}
+ for k,v in pairs(net.hook) do
+  pcall(v,table.unpack(eventTab))
+ end
  for k,v in pairs(packetCache) do
   if computer.uptime() > v+30 then
    packetCache[k] = nil

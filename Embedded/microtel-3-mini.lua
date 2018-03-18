@@ -1,7 +1,7 @@
 _G.net={}
 do
 local M,pQ,pC,rC,C,Y={},{},{},{},computer,table.unpack
-net.port,net.hostname,net.route,U=4096,C.address():sub(1,8),true,C.uptime
+net.port,net.hostname,net.route,net.hook,U=4096,C.address():sub(1,8),true,{},C.uptime
 for a in component.list("modem") do
 M[a]=component.proxy(a)
 M[a].open(net.port)
@@ -39,6 +39,9 @@ end
 local rCPE=C.pullSignal
 function C.pullSignal(t)
 local Z={rCPE(t)}
+for k,v in pairs(net.hook) do
+pcall(v,Y(Z))
+end
 for k,v in pairs(pC) do
 if U()>v+30 then
 pC[k]=nil
