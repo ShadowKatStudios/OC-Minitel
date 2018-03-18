@@ -1,7 +1,7 @@
 _G.net={}
 
 do
-local modems,packetQueue,packetCache,routeCache,C = {},{},{},{},COMPUTER
+local modems,packetQueue,packetCache,routeCache,C,Y = {},{},{},{},COMPUTER,UNPACK
 net.port,net.hostname,net.route,U=4096,computer.address():sub(1,8),true,UPTIME
 
 for a in component.list("modem") do

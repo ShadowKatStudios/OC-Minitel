@@ -18,8 +18,10 @@ sed -i -e 's/realComputerPullSignal/rCPE/g' microtel-3-mini.lua
 sed -i -e 's/packetQueue/pQ/g' microtel-3-mini.lua
 sed -i -e 's/computer/C/g' microtel-3-mini.lua
 sed -i -e 's/C.uptime/U/g' microtel-3-mini.lua
+sed -i -e 's/table.unpack/Y/g' microtel-3-mini.lua
 sed -i -e 's/COMPUTER/computer/g' microtel-3-mini.lua
 sed -i -e 's/UPTIME/C.uptime/g' microtel-3-mini.lua
+sed -i -e 's/UNPACK/table.unpack/g' microtel-3-mini.lua
 lua strip.lua microtel-3-mini.lua microtel-3-mini.lua
 
 #microtel-4.lua

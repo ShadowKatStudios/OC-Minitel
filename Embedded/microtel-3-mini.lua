@@ -1,6 +1,6 @@
 _G.net={}
 do
-local M,pQ,pC,rC,C={},{},{},{},computer
+local M,pQ,pC,rC,C,Y={},{},{},{},computer,table.unpack
 net.port,net.hostname,net.route,U=4096,C.address():sub(1,8),true,C.uptime
 for a in component.list("modem") do
 M[a]=component.proxy(a)
@@ -67,10 +67,10 @@ pC[Z[6]]=U()
 end
 for k,v in pairs(pQ) do
 if U()>v[5] then
-sP(k,table.unpack(v))
+sP(k,Y(v))
 v[5]=U()+30
 end
 end
-return table.unpack(Z)
+return Y(Z)
 end
 end
