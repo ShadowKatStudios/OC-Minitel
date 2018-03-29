@@ -58,7 +58,7 @@ sed -i -e 's/conn/C/g' microtel-5-listen-mini.lua
 sed -i -e 's/etype/E/g' microtel-5-listen-mini.lua
 sed -i -e 's/from/F/g' microtel-5-listen-mini.lua
 sed -i -e 's/data/D/g' microtel-5-listen-mini.lua
-lua strip.lua microtel-5-listen-mini.lua microtel-5-core-mini.lua
+lua strip.lua microtel-5-listen-mini.lua microtel-5-listen-mini.lua
 
 #microtel-5-flisten.lua
 cp microtel-5-flisten.lua microtel-5-flisten-mini.lua
@@ -72,7 +72,7 @@ sed -i -e 's/conn/C/g' microtel-5-flisten-mini.lua
 sed -i -e 's/etype/E/g' microtel-5-flisten-mini.lua
 sed -i -e 's/from/F/g' microtel-5-flisten-mini.lua
 sed -i -e 's/data/D/g' microtel-5-flisten-mini.lua
-lua strip.lua microtel-5-flisten-mini.lua microtel-5-core-mini.lua
+lua strip.lua microtel-5-flisten-mini.lua microtel-5-flisten-mini.lua
 
 #microtel-5-open.lua
 cp microtel-5-open.lua microtel-5-open-mini.lua
@@ -86,4 +86,4 @@ sed -i -e 's/conn/C/g' microtel-5-open-mini.lua
 sed -i -e 's/etype/E/g' microtel-5-open-mini.lua
 sed -i -e 's/from/F/g' microtel-5-open-mini.lua
 sed -i -e 's/data/D/g' microtel-5-open-mini.lua
-lua strip.lua microtel-5-open-mini.lua microtel-5-core-mini.lua
+lua strip.lua microtel-5-open-mini.lua microtel-5-open-mini.lua
