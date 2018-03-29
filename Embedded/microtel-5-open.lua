@@ -1,6 +1,6 @@
 net.timeout = 60
 function net.open(address,vport)
- local st=computer.uptime()
+ local st,from,port,data=computer.uptime()
  net.send(address,port,"openstream")
  repeat
   _, from, port, data = computer.pullSignal(0.5)
