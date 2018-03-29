@@ -1,5 +1,5 @@
 function net.flisten(vport,handler)
- function net.hook[vport](etype,from,port,data)
+ local function h(etype,from,port,data)
   if port == vport and data == "openstream" then
    local nport,sclose = math.random(2^15,2^16),tostring(math.random(-2^16,2^16))
    net.send(from,port,tostring(nport))
@@ -7,4 +7,5 @@ function net.flisten(vport,handler)
    handler(net.socket(from,nport,sclose))
   end
  end
+ net.hook[vport] = h
 end
