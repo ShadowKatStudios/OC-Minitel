@@ -15,8 +15,11 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 
 ## Implementations
 ### OpenOS
+
 - [Reference implementation for OpenOS](OpenOS/README.md)
+
 ### Embedded devices
+
 - [Microtel](Embedded/microtel/README.md)
 
 ## Application-layer protocols
