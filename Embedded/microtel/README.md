@@ -33,6 +33,18 @@ Listens for socket connections on *port*, in a blocking manner, and returns a so
 #### net.flisten(*port*,*handler*)
 Adds a hook to run a *handler* function when a client tries to initiate a socket connection on *port*, giving the handler a socket object.
 
+### Socket objects
+Sockets have a few simple functions, which are the same as the normal Minitel version, despite using different names for functions.
+
+#### socket:r(*length*)
+Reads *length* bytes from the socket.
+
+#### socket:w(*data*)
+Writes *data* to the socket, sending it to the other machine.
+
+#### socket:c()
+Closes the socket, and sends the close signal to the other machine.
+
 ## Configuration
 
 ### microtel-3
