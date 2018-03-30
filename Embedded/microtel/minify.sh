@@ -9,6 +9,7 @@ sed -i -e 's/packetType/pT/g' microtel-3-mini.lua
 sed -i -e 's/to/T/g' microtel-3-mini.lua
 sed -i -e 's/vport/vP/g' microtel-3-mini.lua
 sed -i -e 's/data/D/g' microtel-3-mini.lua
+sed -i -e 's/rawSendPacket/rS/g' microtel-3-mini.lua
 sed -i -e 's/sendPacket/sP/g' microtel-3-mini.lua
 sed -i -e 's/genPacketID/gP/g' microtel-3-mini.lua
 sed -i -e 's/packetCache/pC/g' microtel-3-mini.lua

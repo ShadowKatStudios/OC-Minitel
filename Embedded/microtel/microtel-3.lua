@@ -17,15 +17,19 @@ local function genPacketID()
  return packetID
 end
 
-local function sendPacket(packetID,packetType,to,vport,data)
- packetCache[packetID] = computer.uptime()
+local function rawSendPacket(packetID,packetType,to,from,vport,data)
  if routeCache[to] then
-  modems[routeCache[to][1]].send(routeCache[to][2],net.port,packetID,packetType,to,net.hostname,vport,data)
+  modems[routeCache[to][1]].send(routeCache[to][2],net.port,packetID,packetType,to,from,vport,data)
  else
   for k,v in pairs(modems) do
-   v.broadcast(net.port,packetID,packetType,to,net.hostname,vport,data)
+   v.broadcast(net.port,packetID,packetType,to,from,vport,data)
   end
  end
+end
+
+local function sendPacket(packetID,packetType,to,vport,data)
+ packetCache[packetID] = computer.uptime()
+ rawSendPacket(packetID,packetType,to,net.hostname,vport,data)
 end
 
 function net.send(to,vport,data,packetType,packetID)
@@ -71,7 +75,7 @@ function computer.pullSignal(t)
     packetQueue[eventTab[11]] = nil
    end
   elseif net.route and checkCache(eventTab[6]) then
-   sendPacket(eventTab[6],eventTab[7],eventTab[8],eventTab[9],eventTab[10],eventTab[11])
+   rawSendPacket(eventTab[6],eventTab[7],eventTab[8],eventTab[9],eventTab[10],eventTab[11])
   end
   packetCache[eventTab[6]] = computer.uptime()
  end
