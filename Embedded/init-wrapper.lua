@@ -1,8 +1,8 @@
 local c = ""
 do
-function net.hook.sender(et,packetID,packetType,to,vport,data)
+function net.hook.sender(to,vport,data,packetType,packetID)
  if et == "net_send" then
-  net.send(packetID,packetType,to,vport,data)
+  net.send(to,vport,data,packetType,packetID)
  end
 end
 local fs = component.proxy(computer.getBootAddress())
