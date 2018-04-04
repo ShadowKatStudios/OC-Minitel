@@ -241,7 +241,4 @@ while true do
  if hooks[ev[1]] then
   pcall(hooks[ev[1]],table.unpack(ev))
  end
- for k,v in pairs(ev) do
-  neo.emergency(v)
- end
 end
