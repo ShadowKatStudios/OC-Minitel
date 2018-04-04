@@ -203,7 +203,7 @@ listeners["modem_message"]=processPacket
 event.listen("modem_message",processPacket)
 print("Started packet listening daemon: "..tostring(processPacket))
 
-local function queuePacket(_,ptype,to,vport,data,npID)
+local function queuePacket(ptype,to,vport,data,npID)
  npID = npID or genPacketID()
  pqueue[npID] = {ptype,to,vport,data,0,0}
  dprint(npID,table.unpack(pqueue[npID]))
