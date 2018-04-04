@@ -199,19 +199,7 @@ local function processPacket(_,localModem,from,pport,_,packetID,packetType,dest,
  end
 end
 
-listeners["modem_message"]=processPacket
 event.listen("modem_message",processPacket)
-print("Started packet listening daemon: "..tostring(processPacket))
-
-local function queuePacket(ptype,to,vport,data,npID)
- npID = npID or genPacketID()
- pqueue[npID] = {ptype,to,vport,data,0,0}
- dprint(npID,table.unpack(pqueue[npID]))
-end
-
-listeners["net_send"]=queuePacket
-event.listen("net_send",queuePacket)
-print("Started packet queueing daemon: "..tostring(queuePacket))
 
 local function packetPusher()
  for k,v in pairs(pqueue) do
@@ -228,11 +216,12 @@ local function packetPusher()
  end
 end
 
-timers[#timers+1]=event.timer(0,packetPusher,math.huge)
-print("Started packet pusher: "..tostring(timers[#timers]))
-
-listeners["net_ack"]=dprint
-event.listen("net_ack",dprint)
+local function queuePacket(ptype,to,vport,data,npID)
+ npID = npID or genPacketID()
+ pqueue[npID] = {ptype,to,vport,data,0,0}
+ dprint(npID,table.unpack(pqueue[npID]))
+ packetPusher()
+end
 
 -- More KOS NEO stuff
 
