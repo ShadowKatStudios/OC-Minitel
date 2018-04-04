@@ -18,6 +18,10 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 
 - [Reference implementation for OpenOS](OpenOS/README.md)
 
+### KittenOS
+
+- [Minitel for KittenOS NEO](KittenOS/README.md)
+
 ### Embedded devices
 
 - [Microtel](Embedded/microtel/README.md)
