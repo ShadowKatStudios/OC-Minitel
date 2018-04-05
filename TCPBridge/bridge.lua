@@ -5,11 +5,30 @@ local clients, coroutines, messages = {}, {}, {}
 
 local function spawn(f)
  coroutines[#coroutines+1] = coroutine.create(function()
+  pid = #coroutines
   while true do
-   print(pcall(f))
+   print(pid,pcall(f))
   end
  end)
 end
+
+function reprint(...)
+ local tA = {...}
+ for k,v in pairs(tA) do
+  local s = ""
+  v=tostring(v)
+  for i = 1, v:len() do
+   if string.byte(v:sub(i,i)) < 32 or string.byte(v:sub(i,i)) > 127 then
+    s=s .. "\\" .. tostring(string.byte(v:sub(i,i)))
+   else
+    s=s..v:sub(i,i)
+   end
+  end
+  print(s)
+ end
+end
+
+reprint(imt.encodePacket("Hello, world!",123))
 
 local function hasValidPacket(s)
  local w, res = pcall(imt.decodePacket,s)
@@ -25,7 +44,8 @@ function socketLoop()
   if client then
    client:settimeout(0)
    clients[#clients+1] = {["conn"]=client,last=os.time(),buffer=""}
-   print("Gained client: "..client:getsockname())
+   local i,p = client:getsockname()
+   print("Gained client #"..tostring(#clients)..": "..i..":"..tostring(p))
   end
   coroutine.yield()
  end
@@ -35,11 +55,21 @@ spawn(socketLoop)
 
 function clientLoop()
  while true do
-  for _,client in pairs(clients) do
-   local s=client.conn:receive()
+  for id,client in pairs(clients) do
+   local s,b,c=client.conn:receive(1)
    if s then
     client.buffer = client.buffer .. s
-    print(s)
+    client.last=os.time()
+   end
+   if client.buffer:len() > 16384 then
+    print("Dropping client "..tostring(id).." for wasting resources")
+    client.conn:close()
+    clients[id] = nil
+   end
+   if client.last+30 < os.time() then
+    print("Dropping client "..tostring(id).." for inactivity")
+    client.conn:close()
+    clients[id] = nil
    end
   end
   coroutine.yield()
@@ -52,10 +82,10 @@ function pushLoop()
  while true do
   for id,msg in pairs(messages) do
    for _,client in pairs(clients) do
-    client.conn:send(msg.."\n")
+    client.conn:send(msg)
    end
    messages[id] = nil
-   print(msg)
+   reprint(msg)
   end
   coroutine.yield()
  end
@@ -67,9 +97,9 @@ function bufferLoop()
  while true do
   for _,client in pairs(clients) do
    if client.buffer:len() > 0 then
-    if hasValidPacket(client.buffer) then
-     messages[#messages+1] = imt.encodePacket(imt.decodePacket(client.buffer))
-     client.buffer = imt.getRemainder(client.buffer)
+    if imt.decodePacket(client.buffer) then
+    messages[#messages+1] = imt.encodePacket(imt.decodePacket(client.buffer))
+    client.buffer = imt.getRemainder(client.buffer) or ""
     end
    end
   end

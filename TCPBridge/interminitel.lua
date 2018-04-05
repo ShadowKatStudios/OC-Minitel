@@ -31,18 +31,20 @@ function imt.decodePacket(s)
   s=s:sub(n+1)
   return ns
  end
+ if s:len() < 2 then return false end
  local plen = imt.from16bn(getfirst(2))
+ local segments = {}
  if s:len() < plen then return false end
  local nsegments = string.byte(getfirst(1))
- local tsegments = {}
+ --print(tostring(plen).." bytes, "..tostring(nsegments).." segments")
  for i = 1, nsegments do
-  if s:len() < 1 then return false end
   local seglen = imt.from16bn(getfirst(2))
-  local segtype = string.byte(getfirst(1))
-  local tempseg = getfirst(seglen)
-  tsegments[#tsegments+1] = imt.ftypes[segtype](tempseg)
+  local segtype = imt.ftypes[string.byte(getfirst(1))]
+  local segment = segtype(getfirst(seglen))
+  --print(seglen,segtype,segment,type(segment))
+  segments[#segments+1] = segment
  end
- return table.unpack(tsegments)
+ return table.unpack(segments)
 end
 function imt.getRemainder(s)
  local function getfirst(n)
