@@ -3,12 +3,19 @@ local imt = require "interminitel"
 
 local clients, coroutines, messages = {}, {}, {}
 
-local function hasValidPacket(s)
- local w, pi, pt, ds, sn, po, da = pcall(imt.decodePacket,s)
- if w and pi and pt and ds and sn and po and da then
-  return true
- end
+local function spawn(f)
+ coroutines[#coroutines+1] = coroutine.create(function()
+  while true do
+   print(pcall(f))
+  end
+ end)
 end
+
+local function hasValidPacket(s)
+ local w, res = pcall(imt.decodePacket,s)
+ if res then return true end
+end
+hasValidPacket("")
 
 function socketLoop()
  local server = socket.bind("*", 4096)
@@ -17,27 +24,29 @@ function socketLoop()
   local client,err = server:accept()
   if client then
    client:settimeout(0)
-   clients[#clients+1] = {["conn"]=client,last=os.time()}
+   clients[#clients+1] = {["conn"]=client,last=os.time(),buffer=""}
+   print("Gained client: "..client:getsockname())
   end
   coroutine.yield()
  end
 end
 
-coroutines[#coroutines+1]=coroutine.create(socketLoop)
+spawn(socketLoop)
 
 function clientLoop()
  while true do
   for _,client in pairs(clients) do
-   local s=client.conn:receive(16384)
+   local s=client.conn:receive()
    if s then
     client.buffer = client.buffer .. s
+    print(s)
    end
   end
   coroutine.yield()
  end
 end
 
-coroutines[#coroutines+1]=coroutine.create(clientLoop)
+spawn(clientLoop)
 
 function pushLoop()
  while true do
@@ -52,22 +61,23 @@ function pushLoop()
  end
 end
 
-coroutines[#coroutines+1]=coroutine.create(pushLoop)
+spawn(pushLoop)
 
 function bufferLoop()
  while true do
   for _,client in pairs(clients) do
-   if hasValidPacket(client.buffer) then
-    local tPacket = {imt.decodePacket(client.buffer)}
-    client.buffer = table.remove(tPacket,#tPacket)
-    messages[#messages+1] = imt.encodePacket(table.unpack(tPacket))
+   if client.buffer:len() > 0 then
+    if hasValidPacket(client.buffer) then
+     messages[#messages+1] = imt.encodePacket(imt.decodePacket(client.buffer))
+     client.buffer = imt.getRemainder(client.buffer)
+    end
    end
   end
   coroutine.yield()
  end
 end
 
-coroutines[#coroutines+1]=coroutine.create(bufferLoop)
+spawn(bufferLoop)
 
 while #coroutines > 0 do
  for k,v in pairs(coroutines) do
