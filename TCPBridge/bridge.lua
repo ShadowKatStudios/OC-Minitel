@@ -66,7 +66,7 @@ function clientLoop()
     client.conn:close()
     clients[id] = nil
    end
-   if client.last+30 < os.time() then
+   if client.last+3000 < os.time() then
     print("Dropping client "..tostring(id).." for inactivity")
     client.conn:close()
     clients[id] = nil
@@ -81,11 +81,11 @@ spawn(clientLoop)
 function pushLoop()
  while true do
   for id,msg in pairs(messages) do
-   for _,client in pairs(clients) do
+   for k,client in pairs(clients) do
     client.conn:send(msg)
+    reprint("Message #"..tostring(id).." -> Client #"..tostring(k).." - "..msg)
    end
    messages[id] = nil
-   reprint(msg)
   end
   coroutine.yield()
  end
