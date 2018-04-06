@@ -54,4 +54,4 @@ By default, the bridge server:
 - uses port 4096, as Minitel does on OpenComputers networks
 - drops clients after 60 seconds of inactivity
 
-This can be configured by **FIXME.**
+This can be configured by appending a port number and timeout (in seconds) to the command you use to launch the bridge.

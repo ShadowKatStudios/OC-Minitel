@@ -1,6 +1,10 @@
 local socket = require "socket"
 local imt = require "interminitel"
 
+local tArgs = {...}
+
+local port, timeout = tonumber(tArgs[1]) or 4096, tonumber(tArgs[2]) or 60
+
 local clients, coroutines, messages = {}, {}, {}
 
 local function spawn(f)
@@ -28,8 +32,6 @@ function reprint(...)
  end
 end
 
-reprint(imt.encodePacket("Hello, world!",123))
-
 local function hasValidPacket(s)
  local w, res = pcall(imt.decodePacket,s)
  if res then return true end
@@ -37,8 +39,9 @@ end
 hasValidPacket("")
 
 function socketLoop()
- local server = socket.bind("*", 4096)
+ local server = socket.bind("*", port)
  server:settimeout(0)
+ print("vTunnel bridge server listening on port "..tostring(port))
  while true do
   local client,err = server:accept()
   if client then
@@ -66,7 +69,7 @@ function clientLoop()
     client.conn:close()
     clients[id] = nil
    end
-   if client.last+3000 < os.time() then
+   if client.last+timeout < os.time() then
     print("Dropping client "..tostring(id).." for inactivity")
     client.conn:close()
     clients[id] = nil

@@ -21,12 +21,14 @@ The protocol is documented [here](vtunnel-protocol.md)
 At present, all you need to do is run bridge.lua, for example:
 
 ```
-lua53 bridge.lua
+lua53 bridge.lua [port] [timeout]
 ```
 
 ### Client
 
 #### OPPM
+
+Not yet functional, but when it is:
 
 ```
 oppm install vtunnel
