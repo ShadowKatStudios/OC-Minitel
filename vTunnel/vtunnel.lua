@@ -37,7 +37,7 @@ function proxy.maxPacketSize()
  return 12288
 end
 
-proxy.type = tunnel
+proxy.type = "tunnel"
 proxy.slot = 4096
 
 local docs = {
