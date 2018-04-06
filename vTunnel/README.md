@@ -28,14 +28,13 @@ lua53 bridge.lua [port] [timeout]
 
 #### OPPM
 
-Not yet functional, but when it is:
-
 ```
 oppm install vtunnel
 ```
 
 #### Manual
 1. Install vtunnel.lua to /usr/bin
+2. Install interminitel.lua to /usr/lib
 
 #### Starting
 
