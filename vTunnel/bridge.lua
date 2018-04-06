@@ -64,6 +64,9 @@ function clientLoop()
     client.buffer = client.buffer .. s
     client.last=os.time()
    end
+   if client.buffer:sub(1,3) == "\0\1\0" then
+    client.buffer=client.buffer:sub(4)
+   end
    if client.buffer:len() > 16384 then
     print("Dropping client "..tostring(id).." for wasting resources")
     client.conn:close()
