@@ -42,7 +42,7 @@ oppm install vtunnel
 vTunnel is invoked as follows:
 
 ```
-vtunnel server_address server_port
+vtunnel <server address> <server port> [poll timer] [keepalive timer]
 ```
 
 This will create a virtual linked card component connected to server\_address:server\_port
@@ -53,7 +53,7 @@ This will create a virtual linked card component connected to server\_address:se
 2. Add the following to your .shrc:
 
 ```
-vtunnel server_address server_port
+vtunnel <server address> <server port> [poll timer] [keepalive timer]
 rc minitel start
 ```
 
