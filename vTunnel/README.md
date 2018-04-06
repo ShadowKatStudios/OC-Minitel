@@ -4,6 +4,8 @@ vTunnel can be used to add bridging over the internet to any existing OpenOS sof
 
 Despite originally being written for Minitel, vTunnel implements a fully-functional linked card emulator and a server that will run under most unix-likes (OpenBSD is currently somewhat flaky, Linux is recommended).
 
+The protocol is documented [here](vtunnel-protocol.md)
+
 ## Setup
 
 ### Server
