@@ -87,10 +87,10 @@ spawn(clientLoop)
 function pushLoop()
  while true do
   for id,msg in pairs(messages) do
-   if msg:len() > 3 then
+   if msg[1]:len() > 3 then
     for k,client in pairs(clients) do
-     client.conn:send(msg)
-     reprint("Message #"..tostring(id).." -> Client #"..tostring(k).." - "..msg)
+     client.conn:send(msg[1])
+     reprint("Message #"..tostring(id).." (Client #"..tostring(msg[2]).." -> Client #"..tostring(k).." - "..msg[1])
     end
    end
    messages[id] = nil
@@ -103,10 +103,10 @@ spawn(pushLoop)
 
 function bufferLoop()
  while true do
-  for _,client in pairs(clients) do
+  for id,client in pairs(clients) do
    if client.buffer:len() > 0 then
     if imt.decodePacket(client.buffer) then
-    messages[#messages+1] = imt.encodePacket(imt.decodePacket(client.buffer))
+    messages[#messages+1] = {imt.encodePacket(imt.decodePacket(client.buffer)),id}
     client.buffer = imt.getRemainder(client.buffer) or ""
     end
    end
