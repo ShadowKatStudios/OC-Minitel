@@ -7,6 +7,7 @@ local internet = component.internet
 local tArgs = {...}
 
 local addr, raddr = vcomp.uuid(),vcomp.uuid()
+local poll, keepalive = tonumber(tArgs[3]) or 5, tonumber(tArgs[4]) or 30
 
 local socket = internet.connect(tArgs[1],tonumber(tArgs[2]))
 repeat
@@ -16,12 +17,16 @@ until socket.finishConnect()
 local proxy = {}
 local rbuffer = ""
 
-local timer = event.timer(5,function()
+local timer = event.timer(poll,function()
  rbuffer=rbuffer..(socket.read(4096) or "")
  if imt.decodePacket(rbuffer) then
   computer.pushSignal("modem_message",addr,raddr,0,0,imt.decodePacket(rbuffer))
   rbuffer = imt.getRemainder(rbuffer) or ""
  end
+end,math.huge)
+
+local katimer = event.timer(keepalive,function()
+ socket.write("\0\1\0")
 end,math.huge)
 
 function proxy.send(...)
