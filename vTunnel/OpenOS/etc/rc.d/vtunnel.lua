@@ -8,6 +8,7 @@ local internet = component.internet
 local addr, raddr = vcomp.uuid(),vcomp.uuid()
 local poll = 0.5
 local listener, timer
+local socket
 
 -- dumb keepalive stuff
 local keepalive = 30
@@ -16,7 +17,7 @@ local katimer
 function start(iaddr,port)
  if listener then return end
  iaddr,port = iaddr or "shadowkat.net", tonumber(port) or 4096
- local socket = internet.connect(iaddr,port)
+ socket = internet.connect(iaddr,port)
  print("Connecting to "..iaddr..":"..tostring(port).."...")
  repeat
   os.sleep(0.5)
@@ -73,7 +74,12 @@ function stop()
   event.cancel(timer)
   timer = nil
  end
- if component.type(addr) then
- vcomp.unregister(addr)
+ if katimer then
+  event.cancel(katimer)
+  katimer = nil
  end
+ if component.type(addr) then
+  vcomp.unregister(addr)
+ end
+ socket.close()
 end
