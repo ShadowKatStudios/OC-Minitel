@@ -33,7 +33,7 @@ oppm install vtunnel
 ```
 
 #### Manual
-1. Install vtunnel.lua to /usr/bin
+1. Install vtunnel.lua to /etc/rc.d
 2. Install interminitel.lua to /usr/lib
 
 #### Starting
@@ -41,7 +41,7 @@ oppm install vtunnel
 vTunnel is invoked as follows:
 
 ```
-vtunnel <server address> <server port> [poll timer] [keepalive timer]
+rc vtunnel start <server address> <server port>
 ```
 
 This will create a virtual linked card component connected to server\_address:server\_port
@@ -49,10 +49,11 @@ This will create a virtual linked card component connected to server\_address:se
 #### Minitel configuration
 
 1. Disable minitel with rc - `rc minitel disable`
-2. Add the following to your .shrc:
+1. Enable vtunnel with rc - `rc vtunnel enable`
+2. Add the following to your ~/.shrc:
 
 ```
-vtunnel <server address> <server port> [poll timer] [keepalive timer]
-rc minitel start
+rc minitel start > /dev/null
 ```
 
+This will ensure that Minitel sees the virtual tunnel component created by vTunnel and routes packets via it.
