@@ -7,6 +7,8 @@ local port, timeout = tonumber(tArgs[1]) or 4096, tonumber(tArgs[2]) or 60
 
 local clients, coroutines, messages = {}, {}, {}
 
+local clientcounter = 1
+
 local function spawn(f)
  coroutines[#coroutines+1] = coroutine.create(function()
   pid = #coroutines
@@ -46,9 +48,10 @@ function socketLoop()
   local client,err = server:accept()
   if client then
    client:settimeout(0)
-   clients[#clients+1] = {["conn"]=client,last=os.time(),buffer=""}
+   clients[clientcounter+1] = {["conn"]=client,last=os.time(),buffer=""}
+   clientcounter = clientcounter + 1
    local i,p = client:getsockname()
-   print("Gained client #"..tostring(#clients)..": "..i..":"..tostring(p))
+   print("Gained client #"..tostring(clientcounter)..": "..i..":"..tostring(p))
   end
   coroutine.yield()
  end
@@ -63,6 +66,10 @@ function clientLoop()
    if s then
     client.buffer = client.buffer .. s
     client.last=os.time()
+   elseif b == "closed" then
+    print("Client "..tostring(id).." disconnected")
+    client.conn:close()
+    clients[id] = nil
    end
    if client.buffer:sub(1,3) == "\0\1\0" then
     client.buffer=client.buffer:sub(4)
