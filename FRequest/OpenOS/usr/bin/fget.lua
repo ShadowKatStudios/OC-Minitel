@@ -5,7 +5,7 @@ local tArgs = {...}
 local address, path = tArgs[1], tArgs[2]
 local port = 70
 
-local host,nport = host:match("(.+):(%d+)")
+local host,nport = address:match("(.+):(%d+)")
 port = nport or port
 host = host or address
 
