@@ -67,6 +67,7 @@ function start()
  end
  print("Hostname: "..hostname)
  if listener then return end
+ modems={}
  for a,t in component.list("modem") do
   modems[#modems+1] = component.proxy(a)
  end
