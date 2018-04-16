@@ -16,7 +16,9 @@ local katimer
 
 function start(faddr)
  if listener then return end
- local host,nport = faddr:match("(.+):(%d+)")
+ if faddr then
+  local host,nport = faddr:match("(.+):(%d+)")
+ end
  local iaddr,port = host or faddr or "shadowkat.net", tonumber(nport) or 4096
  socket = internet.connect(iaddr,port)
  print("Connecting to "..iaddr..":"..tostring(port).."...")
