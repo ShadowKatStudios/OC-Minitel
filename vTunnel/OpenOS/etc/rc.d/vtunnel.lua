@@ -14,9 +14,10 @@ local socket
 local keepalive = 30
 local katimer
 
-function start(iaddr,port)
+function start(faddr)
  if listener then return end
- iaddr,port = iaddr or "shadowkat.net", tonumber(port) or 4096
+ local host,nport = faddr:match("(.+):(%d+)")
+ local iaddr,port = host or faddr or "shadowkat.net", tonumber(nport) or 4096
  socket = internet.connect(iaddr,port)
  print("Connecting to "..iaddr..":"..tostring(port).."...")
  repeat
