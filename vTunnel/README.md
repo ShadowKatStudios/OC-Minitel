@@ -37,7 +37,7 @@ oppm install vtunnel
 1. Install vtunnel.lua to /etc/rc.d
 2. Install interminitel.lua to /usr/lib
 
-#### Setup
+#### Running
 
 vTunnel is invoked as follows:
 
@@ -46,6 +46,8 @@ rc vtunnel start <server address>:<server port>
 ```
 
 This will create a virtual linked card component connected to server\_address:server\_port.
+
+#### Configuration
 
 vTunnel can also be configured to start automatically. First, one would enable the rc service:
 
