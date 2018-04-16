@@ -49,11 +49,7 @@ This will create a virtual linked card component connected to server\_address:se
 #### Minitel configuration
 
 1. Disable minitel with rc - `rc minitel disable`
-1. Enable vtunnel with rc - `rc vtunnel enable`
-2. Add the following to your ~/.shrc:
+2. Enable vtunnel with rc - `rc vtunnel enable`
+3. Enable minitel with rc - `rc minitel enable`
 
-```
-rc minitel start > /dev/null
-```
-
-This will ensure that Minitel sees the virtual tunnel component created by vTunnel and routes packets via it.
+This will ensure that Minitel starts later than vTunnel, allowing it to see the virtual tunnel component.

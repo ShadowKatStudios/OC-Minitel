@@ -42,7 +42,7 @@ hasValidPacket("")
 
 function socketLoop()
  local server = socket.bind("*", port)
- server:settimeout(0)
+ server:settimeout(0.01)
  print("vTunnel bridge server listening on port "..tostring(port))
  while true do
   local client,err = server:accept()
