@@ -33,18 +33,33 @@ oppm install vtunnel
 ```
 
 #### Manual
+
 1. Install vtunnel.lua to /etc/rc.d
 2. Install interminitel.lua to /usr/lib
 
-#### Starting
+#### Setup
 
 vTunnel is invoked as follows:
 
 ```
-rc vtunnel start <server address> <server port>
+rc vtunnel start <server address>:<server port>
 ```
 
-This will create a virtual linked card component connected to server\_address:server\_port
+This will create a virtual linked card component connected to server\_address:server\_port.
+
+vTunnel can also be configured to start automatically. First, one would enable the rc service:
+
+```
+rc vtunnel enable
+```
+
+Then, edit /etc/rc.cfg and add a line as follows:
+
+```
+vtunnel = "server.address:port"
+```
+
+Leaving it as default will result in vTunnel connecting to the public SKS bridge.
 
 #### Minitel configuration
 
