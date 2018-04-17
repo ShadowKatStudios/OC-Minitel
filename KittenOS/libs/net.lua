@@ -91,7 +91,7 @@ local function socket(addr,port,sclose) -- todo, add remote closing of sockets
  conn.write = cwrite
  conn.read = cread
  conn.state = "open"
- local function listener(_,t,f,p,d)
+ local function listener(t,f,p,d)
   if f == conn.addr and p == conn.port then
    if d == sclose then
     conn:close()
