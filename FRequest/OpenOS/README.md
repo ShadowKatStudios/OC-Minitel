@@ -21,7 +21,13 @@ fget can be used to get both directory listings and files, provided the server a
 To use fget, run:
 
 ```
-fget <host[:port]> <path>
+fget <host[:port]>/<path>
+```
+
+So, for example:
+
+```
+fget sks-srv:70/OpenOS
 ```
 
 ## fserv daemon

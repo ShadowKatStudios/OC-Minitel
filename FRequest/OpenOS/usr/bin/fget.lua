@@ -1,13 +1,16 @@
 local net = require "net"
 local event = require "event"
 
-local tArgs = {...}
-local address, path = tArgs[1], tArgs[2]
-local port = 70
+local function parseURL(url)
+ local hp, path = url:match("(.-)(/.+)")
+ hp, path = hp or url, path or "/"
+ local host, port = hp:match("(.+):(.+)")
+ host, port = host or hp, port or 70
+ return host, port, path
+end
 
-local host,nport = address:match("(.+):(%d+)")
-port = nport or port
-host = host or address
+local tArgs = {...}
+local host, port, path = parseURL(tArgs[1])
 
 local socket = net.open(host,port)
 socket:write("t"..path.."\n")
