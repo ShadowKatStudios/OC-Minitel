@@ -6,6 +6,11 @@ neo.requireAccess("s.h.modem_message","pulling packets")
 local processes = {}
 local hooks = {}
 local computer = {["uptime"]=os.uptime,["address"]=os.address} -- wrap computer so the OpenOS code more or less works
+
+if not computer.address then -- R1 compatibility
+ computer.address = neo.requireAccess("k.computer","get address").address
+end
+
 local event = {}
 function event.timer()
 end
@@ -45,6 +50,8 @@ local event = require "event"
 local component = require "component"
 local computer = require "computer"
 ]]--
+
+
 local hostname = computer.address():sub(1,8)
 local listener = false
 local dbug = true
