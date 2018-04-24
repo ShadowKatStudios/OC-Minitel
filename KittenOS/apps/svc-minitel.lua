@@ -1,11 +1,11 @@
 -- KittenOS NEO Wrapper for OpenOS Minitel
 -- Take my word for it it works p. well
 
-local rcomputer = neo.requireAccess("k.computer","pushing packets")
+--local rcomputer = neo.requireAccess("k.computer","pushing packets")
 neo.requireAccess("s.h.modem_message","pulling packets")
 local processes = {}
 local hooks = {}
-local computer = {["uptime"]=rcomputer.uptime,["address"]=rcomputer.address} -- wrap computer so the OpenOS code more or less works
+local computer = {["uptime"]=os.uptime,["address"]=os.address} -- wrap computer so the OpenOS code more or less works
 local event = {}
 function event.timer()
 end
@@ -88,19 +88,12 @@ local function dprint(...)
  end
 end
 
--- this stuff doesn't work on KittenOS, I'll need to implement a better hostname getting thing than the computer address
---[[
-local f=io.open("/etc/hostname","rb")
-if f then
- hostname = f:read()
- f:close()
+local globals = neo.requestAccess("x.neo.pub.globals") -- KittenOS standard hostname stuff
+if globals then
+ hostname = globals.getSetting("hostname") or hostname
+ globals.setSetting("hostname",hostname)
 end
-print("Hostname: "..hostname)
-if listener then return end
-for a,t in component.list("modem") do
- modems[#modems+1] = component.proxy(a)
-end
-]]--
+
 for p in neo.requireAccess("c.modem","networking").list() do -- fun stuff for KittenOS
  dprint(p.address)
  modems[p.address] = p
