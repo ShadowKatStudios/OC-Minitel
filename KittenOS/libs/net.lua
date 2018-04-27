@@ -1,8 +1,12 @@
 function returnNet(event,computer,minitel)
 
+local dbug = false
+
 function print(...)
- for k,v in pairs({...}) do
-  neo.emergency(tostring(k)..": "..tostring(v))
+ if dbug then
+  for k,v in pairs({...}) do
+   neo.emergency(tostring(k)..": "..tostring(v))
+  end
  end
 end
 
