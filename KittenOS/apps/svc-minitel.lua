@@ -1,7 +1,5 @@
 -- KittenOS NEO Wrapper for OpenOS Minitel
--- Take my word for it it works p. well
 
---local rcomputer = neo.requireAccess("k.computer","pushing packets")
 neo.requireAccess("s.h.modem_message","pulling packets")
 local processes = {}
 local hooks = {}
@@ -44,17 +42,9 @@ data: the actual packet data, duh.
 
 local listeners = {}
 local timers = {}
-
---[[
-local event = require "event"
-local component = require "component"
-local computer = require "computer"
-]]--
-
-
 local hostname = computer.address():sub(1,8)
 local listener = false
-local dbug = true
+local dbug = false
 local modems = {}
 local port = 4096
 local retry = 30
