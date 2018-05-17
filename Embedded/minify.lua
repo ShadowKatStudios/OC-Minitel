@@ -33,8 +33,6 @@ local replacements={
 {"%-%-.-\n",""},
 }
 
-dprint("Loading replacements...")
-
 local initr = #replacements
 
 local fmin = io.open(minfile,"rb")
