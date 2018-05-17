@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 #microtel-3.lua
 cp microtel-3.lua microtel-3-mini.lua
-sed -i -e 's/eventTab/Z/g' microtel-3-mini.lua
-sed -i -e 's/modems/M/g' microtel-3-mini.lua
-sed -i -e 's/qPacket/qP/g' microtel-3-mini.lua
-sed -i -e 's/packetID/pID/g' microtel-3-mini.lua
-sed -i -e 's/packetType/pT/g' microtel-3-mini.lua
-sed -i -e 's/to/T/g' microtel-3-mini.lua
-sed -i -e 's/vport/vP/g' microtel-3-mini.lua
-sed -i -e 's/data/D/g' microtel-3-mini.lua
-sed -i -e 's/rawSendPacket/rS/g' microtel-3-mini.lua
-sed -i -e 's/sendPacket/sP/g' microtel-3-mini.lua
-sed -i -e 's/genPacketID/gP/g' microtel-3-mini.lua
-sed -i -e 's/packetCache/pC/g' microtel-3-mini.lua
-sed -i -e 's/checkCache/cC/g' microtel-3-mini.lua
-sed -i -e 's/routeCache/rC/g' microtel-3-mini.lua
-sed -i -e 's/realComputerPullSignal/rCPE/g' microtel-3-mini.lua
-sed -i -e 's/packetQueue/pQ/g' microtel-3-mini.lua
-sed -i -e 's/computer/C/g' microtel-3-mini.lua
-sed -i -e 's/C.uptime/U/g' microtel-3-mini.lua
-sed -i -e 's/table.unpack/Y/g' microtel-3-mini.lua
-sed -i -e 's/COMPUTER/computer/g' microtel-3-mini.lua
-sed -i -e 's/UPTIME/C.uptime/g' microtel-3-mini.lua
-sed -i -e 's/UNPACK/table.unpack/g' microtel-3-mini.lua
+sed -i -e 's/eventTab/Z/g' \
+-e 's/modems/M/g' \
+-e 's/qPacket/qP/g' \
+-e 's/packetID/pID/g' \
+-e 's/packetType/pT/g' \
+-e 's/to/T/g' \
+-e 's/vport/vP/g' \
+-e 's/data/D/g' \
+-e 's/rawSendPacket/rS/g' \
+-e 's/sendPacket/sP/g' \
+-e 's/genPacketID/gP/g' \
+-e 's/packetCache/pC/g' \
+-e 's/checkCache/cC/g' \
+-e 's/routeCache/rC/g' \
+-e 's/realComputerPullSignal/rCPE/g' \
+-e 's/packetQueue/pQ/g' \
+-e 's/computer/C/g' \
+-e 's/C.uptime/U/g' \
+-e 's/table.unpack/Y/g' \
+-e 's/COMPUTER/computer/g' \
+-e 's/UPTIME/C.uptime/g' \
+-e 's/UNPACK/table.unpack/g' microtel-3-mini.lua
 lua strip.lua microtel-3-mini.lua microtel-3-mini.lua
 
 #microtel-4.lua

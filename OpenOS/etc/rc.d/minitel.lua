@@ -170,6 +170,11 @@ function start()
  
  local function queuePacket(_,ptype,to,vport,data,npID)
   npID = npID or genPacketID()
+  if to == hostname or to == "localhost" then
+   computer.pushSignal("net_msg",to,vport,data)
+   computer.pushSignal("net_ack",npID)
+   return
+  end
   pqueue[npID] = {ptype,to,vport,data,0,0}
   dprint(npID,table.unpack(pqueue[npID]))
  end
