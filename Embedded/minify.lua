@@ -5,6 +5,7 @@ local infile = tArgs[1]
 local minfile = tArgs[1]..".min"
 local outfile = tArgs[2]
 local dbug = true
+if not outfile then dbug = false end
 
 local function dprint(...)
  if dbug then
@@ -58,7 +59,7 @@ for k,v in ipairs(replacements) do
  end
 end
 
-print("Delta: "..tostring(initl - ss:len()).." bytes")
+dprint("Delta: "..tostring(initl - ss:len()).." bytes")
 
 if outfile then
  local outf = io.open(outfile,"wb")
