@@ -1,7 +1,7 @@
 function net.socket(address, port, sclose)
  local conn, rb = {}, ""
  conn.state, conn.buffer, conn.port, conn.address = "o", "", tonumber(port), address
- function conn.r(self,length)
+ function conn.r(self,l)
   rb=self.buffer:sub(1,l)
   self.buffer=self.buffer:sub(l+1)
   return rb

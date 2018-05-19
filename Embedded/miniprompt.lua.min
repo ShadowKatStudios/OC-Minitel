@@ -1,0 +1,12 @@
+{
+ {"write","W"},
+ {"print","P"},
+ {"read","R"},
+ {"tSignal","T"},
+ {"sBuffer","S"},
+ {"tResult","V"},
+ {"GPU","B"},
+ {"ga","N"},
+ {"sa","M"},
+ {"%-%-API","read,write,print=R,W,P"},
+}
