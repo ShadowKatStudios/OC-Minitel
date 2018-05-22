@@ -1,3 +1,6 @@
 {
+ {"read,write,print=R,W,P","print,read,write=P,R,W\npcall(load(component.invoke(component.list(\"eeprom\")(),\"getData\")))"},
  {"component","GC"},
+ {"computer","UC"},
+ {"vt100emu","VT"},
 }

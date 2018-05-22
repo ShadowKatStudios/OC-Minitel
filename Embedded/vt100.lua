@@ -12,24 +12,12 @@ function vt100emu(gpu)
  gpu.setResolution(mx,my)
  gpu.fill(1,1,mx,my," ")
 
- local function dcursor()
-  pc = gpu.get(cx,cy)
-  gpu.setForeground(0)
-  gpu.setBackground(0xFFFFFF)
-  gpu.set(cx,cy,pc)
-  gpu.setForeground(0xFFFFFF)
-  gpu.setBackground(0)
- end
- local function udcursor()
-  pc = gpu.get(cx,cy)
-  gpu.setForeground(0xFFFFFF)
-  gpu.setBackground(0)
-  gpu.set(cx,cy,pc)
- end
-
  function termwrite(s)
   s=s:gsub("\8","\27[D")
-  udcursor()
+  pc = gpu.get(cx,cy)
+  gpu.setForeground(0xFFFFFF)
+  gpu.setBackground(0)
+  gpu.set(cx,cy,pc)
   for i = 1, s:len() do
    local cc = s:sub(i,i)
 
@@ -107,7 +95,12 @@ function vt100emu(gpu)
 
    lc = cc
   end
-  dcursor()
+  pc = gpu.get(cx,cy)
+  gpu.setForeground(0)
+  gpu.setBackground(0xFFFFFF)
+  gpu.set(cx,cy,pc)
+  gpu.setForeground(0xFFFFFF)
+  gpu.setBackground(0)
  end
 
  return termwrite
