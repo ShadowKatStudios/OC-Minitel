@@ -14,6 +14,7 @@ function fs.resolve(path)
  for i = 2, #segments do
   rpath = rpath .. segments[i] .. "/"
  end
+ rpath = rpath:match("(.+)/") or rpath
  return segments[1],rpath
 end
 
