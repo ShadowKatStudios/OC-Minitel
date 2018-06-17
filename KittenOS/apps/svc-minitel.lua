@@ -47,7 +47,7 @@ local listener = false
 local dbug = false
 local modems = {}
 local port = 4096
-local retry = 30
+local retry = 10
 local route = true
 
 --[[
@@ -60,7 +60,7 @@ address {
 ]]--
 local sroutes = {}
 local rcache = setmetatable({},{__index=sroutes})
-local rctime = 30
+local rctime = 15
 
 --[[
 packet queue format:

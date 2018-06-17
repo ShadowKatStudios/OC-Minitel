@@ -34,7 +34,7 @@ address {
 ]]--
 local sroutes = {}
 local rcache = setmetatable({},{__index=sroutes})
-local rctime = 30
+local rctime = 15
 
 --[[
 packet queue format:
@@ -51,7 +51,7 @@ local pqueue = {}
 
 -- packet cache: [packet ID]=uptime
 local pcache = {}
-local pctime = 15
+local pctime = 30
 
 local function dprint(...)
  if dbug then

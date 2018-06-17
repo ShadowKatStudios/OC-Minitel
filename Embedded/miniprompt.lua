@@ -16,7 +16,7 @@ function read()
    if tSignal[3] > 31 and tSignal[3] < 127 then
     write(string.char(tSignal[3]))
     sBuffer = sBuffer .. string.char(tSignal[3])
-   elseif tSignal[3] == 8 and tSignal[4] == 14 and S:len() > 0 then
+   elseif tSignal[3] == 8 and tSignal[4] == 14 and sBuffer:len() > 0 then
     write("\8 \8")
     sBuffer = sBuffer:sub(1,-2)
    end

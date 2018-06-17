@@ -5,6 +5,8 @@ echo miniprompt.lua
 lua minify.lua miniprompt.lua mini-miniprompt.lua
 echo fget.lua
 lua minify.lua fget.lua mini-fget.lua
+echo ufs.lua
+lua minify.lua ufs.lua mini-ufs.lua
 echo init-wrapper.lua
 lua minify.lua init-wrapper.lua mini-init-wrapper.lua
 echo microtel-3.lua

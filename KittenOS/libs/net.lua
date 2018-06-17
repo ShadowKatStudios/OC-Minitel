@@ -50,11 +50,13 @@ function net.usend(to,port,data,npID)
 end
 
 function net.rsend(to,port,data)
- local pid = net.genPacketID()
- minitel.sendPacket(1,to,port,data,pid)
+ local pid, stime = net.genPacketID(), computer.uptime() + net.streamdelay
+ computer.pushSignal("net_send",1,to,port,data,pid)
  repeat
   _,rpid = svcpull("net_ack")
- until rpid == pid
+ until rpid == pid or computer.uptime() > stime
+ if not rpid then return false end
+ return true
 end
 
 -- ordered packet delivery, layer 4?
@@ -70,8 +72,9 @@ function net.send(to,port,ldata)
   tdata = {ldata}
  end
  for k,v in ipairs(tdata) do
-  net.rsend(to,port,v)
+  if not net.rsend(to,port,v) then return false end
  end
+ return true
 end
 
 -- socket stuff, layer 5?
