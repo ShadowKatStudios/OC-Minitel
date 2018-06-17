@@ -21,7 +21,7 @@ local listener = false
 local dbug = false
 local modems = {}
 local port = 4096
-local retry = 30
+local retry = 10
 local route = true
 
 --[[
@@ -51,7 +51,7 @@ local pqueue = {}
 
 -- packet cache: [packet ID]=uptime
 local pcache = {}
-local pctime = 30
+local pctime = 15
 
 local function dprint(...)
  if dbug then

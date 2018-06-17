@@ -2,7 +2,7 @@ local computer = require "computer"
 local event = require "event"
 local net = {}
 net.mtu = 4096
-net.streamdelay = 60
+net.streamdelay = 30
 net.minport = 32768
 net.maxport = 65535
 net.openports = {}
@@ -20,11 +20,13 @@ function net.usend(to,port,data,npID)
 end
 
 function net.rsend(to,port,data)
- local pid = net.genPacketID()
+ local pid, stime = net.genPacketID(), computer.uptime() + net.streamdelay
  computer.pushSignal("net_send",1,to,port,data,pid)
  repeat
-  _,rpid = event.pull("net_ack")
- until rpid == pid
+  _,rpid = event.pull(0.5,"net_ack")
+ until rpid == pid or computer.uptime() > stime
+ if not rpid then return false end
+ return true
 end
 
 -- ordered packet delivery, layer 4?
@@ -40,15 +42,18 @@ function net.send(to,port,ldata)
   tdata = {ldata}
  end
  for k,v in ipairs(tdata) do
-  net.rsend(to,port,v)
+  if not net.rsend(to,port,v) then return false end
  end
+ return true
 end
 
 -- socket stuff, layer 5?
 
 local function cwrite(self,data)
  if self.state == "open" then
-  net.send(self.addr,self.port,data)
+  if not net.send(self.addr,self.port,data) then
+   self:close()
+  end
  end
 end
 local function cread(self,length)
@@ -58,13 +63,14 @@ local function cread(self,length)
  return rdata
 end
 
-local function socket(addr,port,sclose) -- todo, add remote closing of sockets
+local function socket(addr,port,sclose)
  local conn = {}
  conn.addr,conn.port = addr,tonumber(port)
  conn.rbuffer = ""
  conn.write = cwrite
  conn.read = cread
  conn.state = "open"
+ conn.sclose = sclose
  local function listener(_,f,p,d)
   if f == conn.addr and p == conn.port then
    if d == sclose then
