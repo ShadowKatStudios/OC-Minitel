@@ -1,7 +1,7 @@
 local net = require "net"
 local event = require "event"
 
-local function parseurl(url)
+local function parseURL(url)
  local proto,addr = url:match("(.-)://(.+)")
  addr = addr or url
  local hp, path = addr:match("(.-)(/.*)")
@@ -13,6 +13,7 @@ end
 
 local tArgs = {...}
 local proto, host, port, path = parseURL(tArgs[1])
+port = tonumber(port) or 70
 
 local socket = net.open(host,port)
 socket:write("t"..path.."\n")
