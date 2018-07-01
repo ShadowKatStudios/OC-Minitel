@@ -53,6 +53,7 @@ local function cwrite(self,data)
  if self.state == "open" then
   if not net.send(self.addr,self.port,data) then
    self:close()
+   return false, "timed out"
   end
  end
 end
@@ -90,7 +91,7 @@ local function socket(addr,port,sclose)
 end
 
 function net.open(to,port)
- net.rsend(to,port,"openstream")
+ if not net.rsend(to,port,"openstream") then return false, "no ack from host" end
  local st = computer.uptime()+net.streamdelay
  local est = false
  while true do
