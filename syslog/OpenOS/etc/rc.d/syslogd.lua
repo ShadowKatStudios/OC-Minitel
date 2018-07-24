@@ -18,7 +18,7 @@ local listeners = {}
 local timers = {}
 
 local function filter(msg,level,service)
- if level >= cfg.minlevel then
+ if level <= cfg.minlevel then
   return cfg.write, (cfg.relay and havenet)
  end
  return false, false
@@ -26,7 +26,6 @@ end
 
 function reload()
  local f = io.open("/etc/syslogd.cfg","rb")
- print(f)
  if f then
   local newcfg = serial.unserialize(f:read("*a"))
   f:close()
@@ -57,18 +56,16 @@ local function wentry(_,msg,level,service,host)
   end
  end
  if drelay then
-  net.rsend(cfg.relayhost, cfg.port, entry)
+  net.usend(cfg.relayhost, cfg.port, entry)
  end
- print(msg,level,service,host)
 end
 
 local function remote_listener(_,from,port,data)
  if port ~= cfg.port then return false end
- local ut = computer.uptime()
  local service, level, msg = data:match("(.-)\t(%d)\t(.+)")
  if not service and not level and not msg then return false end
+ msg, level, service = tostring(msg),tonumber(level),tostring(service)
  wentry(nil,msg,level,service,from)
- print(msg,level,service)
 end
 
 function start()
