@@ -45,7 +45,7 @@ The net library provides an easy way of interacting with the minitel daemon, and
 
 *net.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
 
-*net.rsend(host, port, data)* - Sends a reliable packet to *host* on *port* containing *data*.
+*net.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply.
 
 #### Layer 4
 
