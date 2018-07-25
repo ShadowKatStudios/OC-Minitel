@@ -22,6 +22,7 @@ local dbug = false
 local modems = {}
 local port = 4096
 local retry = 10
+local retrycount = 64
 local route = true
 
 --[[
@@ -188,7 +189,7 @@ function start()
    if v[5] < computer.uptime() then
     dprint(k,v[1],v[2],hostname,v[3],v[4])
     sendPacket(k,v[1],v[2],hostname,v[3],v[4])
-    if v[1] ~= 1 or v[6] == 255 then
+    if v[1] ~= 1 or v[6] == retrycount then
      pqueue[k] = nil
     else
      pqueue[k][5]=computer.uptime()+retry
@@ -222,6 +223,10 @@ end
 function set_retry(sn)
  retry = tonumber(sn) or 30
  print("retry = "..tostring(retry))
+end
+function set_retrycount(sn)
+ retrycount = tonumber(sn) or 64
+ print("retrycount = "..tostring(retrycount))
 end
 function set_pctime(sn)
  pctime = tonumber(sn) or 30
