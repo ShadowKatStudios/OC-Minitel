@@ -1,5 +1,6 @@
 local net = require "net"
 local event = require "event"
+local shell = require "shell"
 
 local function parseURL(url)
  local proto,addr = url:match("(.-)://(.+)")
@@ -11,12 +12,16 @@ local function parseURL(url)
  return proto, host, port, path
 end
 
-local tArgs = {...}
+local tArgs, tFlags = shell.parse(...)
 local proto, host, port, path = parseURL(tArgs[1])
 port = tonumber(port) or 70
 
 local socket = net.open(host,port)
-socket:write("t"..path.."\n")
+if tFlags.s then
+ socket:write("s"..path.."\n")
+else
+ socket:write("t"..path.."\n")
+end
 local c = socket:read(1)
 repeat
  c = socket:read(1)
