@@ -12,6 +12,7 @@ cfg.receive = false
 cfg.write = true
 cfg.destination = "/dev/null"
 cfg.minlevel = 6
+cfg.beeplevel = 3
 cfg.filter = {} -- todo
 
 local listeners = {}
@@ -57,6 +58,9 @@ local function wentry(_,msg,level,service,host)
  end
  if drelay then
   net.usend(cfg.relayhost, cfg.port, entry)
+ end
+ if level <= cfg.beeplevel then
+  computer.beep()
  end
 end
 
