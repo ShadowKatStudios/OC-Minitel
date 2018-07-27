@@ -254,7 +254,7 @@ function set(k,v)
   end
  end
  print("cfg."..k.." = "..tostring(cfg[k]))
- writeConfig()
+ saveconfig()
 end
 
 function set_route(to,laddr,raddr)
