@@ -241,29 +241,22 @@ function stop()
  end
 end
 
-function debug()
- cfg.debug = not cfg.debug
+function set(k,v)
+ if type(cfg[k]) == "string" then
+  cfg[k] = v
+ elseif type(cfg[k]) == "number" then
+  cfg[k] = tonumber(v)
+ elseif type(cfg[k]) == "boolean" then
+  if v:lower():sub(1,1) == "t" then
+   cfg[k] = true
+  else
+   cfg[k] = false
+  end
+ end
+ print("cfg."..k.." = "..tostring(cfg[k]))
+ writeConfig()
 end
-function set_retry(sn)
- cfg.retry = tonumber(sn) or 30
- print("retry = "..tostring(cfg.retry))
-end
-function set_retrycount(sn)
- cfg.retrycount = tonumber(sn) or 64
- print("retrycount = "..tostring(cfg.retrycount))
-end
-function set_pctime(sn)
- cfg.pctime = tonumber(sn) or 30
- print("pctime = "..tostring(cfg.pctime))
-end
-function set_rctime(sn)
- cfg.rctime = tonumber(sn) or 30
- print("rctime = "..tostring(cfg.rctime))
-end
-function set_port(sn)
- cfg.port = tonumber(sn) or 4096
- print("port = "..tostring(cfg.port))
-end
+
 function set_route(to,laddr,raddr)
  cfg.sroutes[to] = {laddr,raddr,0}
 end

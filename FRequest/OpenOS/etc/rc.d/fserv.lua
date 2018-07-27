@@ -121,9 +121,17 @@ function stop()
 end
 
 function set(k,v)
- if cfg[k] then
+ if type(cfg[k]) == "string" then
   cfg[k] = v
-  print("cfg."..k.." = "..v)
+ elseif type(cfg[k]) == "number" then
+  cfg[k] = tonumber(v)
+ elseif type(cfg[k]) == "boolean" then
+  if v:lower():sub(1,1) == "t" then
+   cfg[k] = true
+  else
+   cfg[k] = false
+  end
  end
+ print("cfg."..k.." = "..tostring(cfg[k]))
  writeConfig()
 end
