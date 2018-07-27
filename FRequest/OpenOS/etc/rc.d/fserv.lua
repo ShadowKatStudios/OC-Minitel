@@ -18,7 +18,7 @@ end
 local function loadConfig()
  local fobj = io.open("/etc/fserv.cfg","rb")
  if fobj then
-  config = serial.unserialize(fobj:read("*a")) or config
+  cfg = serial.unserialize(fobj:read("*a")) or cfg
   fobj:close()
  end
 end
@@ -26,7 +26,7 @@ end
 local function writeConfig()
  local fobj = io.open("/etc/fserv.cfg","wb")
  if fobj then
-  fobj:write(serial.serialize(config))
+  fobj:write(serial.serialize(cfg))
   fobj:close()
  end
 end
