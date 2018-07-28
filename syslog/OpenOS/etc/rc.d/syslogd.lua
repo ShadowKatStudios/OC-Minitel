@@ -12,7 +12,8 @@ cfg.receive = false
 cfg.write = true
 cfg.destination = "/dev/null"
 cfg.minlevel = 6
-cfg.beeplevel = 3
+cfg.beeplevel = -1
+cfg.displevel = 2
 cfg.filter = {} -- todo
 
 local listeners = {}
@@ -61,6 +62,9 @@ local function wentry(_,msg,level,service,host)
  end
  if level <= cfg.beeplevel then
   computer.beep()
+ end
+ if level <= cfg.displevel then
+  io.write(string.format("%.2f\t%s\t",ut,host)..entry)
  end
 end
 
