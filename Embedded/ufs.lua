@@ -15,7 +15,7 @@ function fs.resolve(path)
   rpath = rpath .. segments[i] .. "/"
  end
  rpath = rpath:match("(.+)/") or rpath
- return segments[1],rpath
+ return segments[1] or "root",rpath
 end
 
 -- generate some simple functions
@@ -84,10 +84,31 @@ function fs.rename(from,to)
  return true
 end
 
+
 fs.mounts.temp = component.proxy(computer.tmpAddress())
 if computer.getBootAddress then
  fs.mounts.boot = component.proxy(computer.getBootAddress())
 end
 for addr, _ in component.list("filesystem") do
  fs.mounts[addr:sub(1,3)] = component.proxy(addr)
+end
+
+local function rf()
+ return false
+end
+fs.mounts.root = {}
+
+for k,v in pairs(fs.mounts.temp) do
+ fs.mounts.root[k] = rf
+end
+function fs.mounts.root.list()
+ local t = {}
+ for k,v in pairs(fs.mounts) do
+  t[#t+1] = k
+ end
+ t.n = #t
+ return t
+end
+function fs.mounts.root.isReadOnly()
+ return true
 end
