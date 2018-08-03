@@ -56,6 +56,7 @@ end
 
 if ops.firstrun then
  print("Run mtcfg to configure advanced settings.")
+ return
 end
 
 local keytab = {}
