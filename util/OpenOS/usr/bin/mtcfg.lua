@@ -1,6 +1,7 @@
 local event = require "event"
 local serial = require "serialization"
 local computer = require "computer"
+local shell = require "shell"
 
 local hostname = os.getenv("HOSTNAME")
 local cfgfile = "/etc/minitel.cfg"
@@ -13,6 +14,8 @@ cfg.route = true
 cfg.rctime = 15
 cfg.pctime = 30
 cfg.sroutes = {}
+
+local args, ops = shell.parse(...)
 
 local function clear()
  io.write("\27[2J\27[H")
@@ -49,6 +52,10 @@ if not hostname then
  os.execute("hostname --update")
  print("Hostname set to "..hostname..". Press any key to continue.")
  event.pull("key_down")
+end
+
+if ops.firstrun then
+ print("Run mtcfg to configure advanced settings.")
 end
 
 local keytab = {}
