@@ -55,6 +55,7 @@ if not hostname then
 end
 
 if ops.firstrun then
+ os.execute("rc minitel enable")
  print("Run mtcfg to configure advanced settings.")
  return
 end
