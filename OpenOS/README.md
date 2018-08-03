@@ -8,7 +8,10 @@ This package includes the Minitel daemon, in etc/rc.d/minitel.lua, and the net l
 
 #### With OPPM
 
-1. Run `oppm install minitel`
+1. Run `oppm install minitel-util`
+2. Run `mtcfg`
+
+This will walk you through setting up Minitel.
 
 #### Manual
 

@@ -130,3 +130,6 @@ if fobj then
  fobj:close()
  print("Settings successfully written!")
 end
+
+print("Enabling daemon...")
+os.execute("rc minitel enable")
