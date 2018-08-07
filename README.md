@@ -30,6 +30,7 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 This repository also contains a number of implementations and specifications for application-layer protocols using Minitel.
 
 - [FRequest](FRequest/FRequest-protocol.md)
+- [syslog](syslog/syslog-protocol.md)
 - [Minitel Mail](MMail/MMail-protocol.md)
 
 ## Development and discussion
