@@ -8,7 +8,7 @@ This package includes the Minitel daemon, in etc/rc.d/minitel.lua, and the net l
 
 #### With OPPM
 
-1. Run `oppm install minitel-util`
+1. Run `oppm install minitel-util` - this will install both the Minitel utilities and pull in the Minitel daemon as a dependency.
 2. Run `mtcfg`
 
 This will walk you through setting up Minitel.
@@ -21,11 +21,11 @@ This will walk you through setting up Minitel.
 
 ### Configuration
 
-The minitel daemon does not keep a configuration file, so settings have to be set every boot.
+The minitel daemon keeps a settings file in /etc/minitel.cfg, which is loaded on start.
 
 To change a setting, one invokes:
 
-`rc minitel set_<option> value`
+`rc minitel set <option> <value>`
 
 #### Available settings
 
@@ -33,8 +33,11 @@ To change a setting, one invokes:
 - pctime: the amount of time packets are kept in the packet cache
 - retry: how many seconds between resend attempts of reliable packets
 - rctime: How long items are kept in the routing cache
+- retrycount: how many attempts to resend should be made
+- route: whether to forward packets
+- debug: whether to output debugging info to the display
 
-In addition, one can invoke *rc minitel debug* to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
+In addition, one can invoke to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
 
 ## Net library
 
