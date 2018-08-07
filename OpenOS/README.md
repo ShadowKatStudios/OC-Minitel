@@ -21,7 +21,7 @@ This will walk you through setting up Minitel.
 
 ### Configuration
 
-The minitel daemon keeps a settings file in /etc/minitel.cfg, which is loaded on start.
+The minitel daemon keeps a settings file in /etc/minitel.cfg, which is loaded on start. This can be edited directly and the daemon restarted, or settings can be changed from the command line.
 
 To change a setting, one invokes:
 
