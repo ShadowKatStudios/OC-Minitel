@@ -67,6 +67,6 @@ In addition, the daemon keeps a configuration file in */etc/syslogd.cfg*. This i
 
 The syslog library and daemon communicate via events, namely a *syslog* event. The format is as follows:
 
-```
+```lua
 "syslog", message, level, service
 ```
