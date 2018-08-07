@@ -1,16 +1,16 @@
 # syslog for OpenOS
 
-This package contains a syslog library, and a syslog daemon, for OpenOS. These are separated, as the daemon is optional.
+This package contains a syslog library, and a syslog daemon, for OpenOS. These are separated, as the daemon is optional and can be replaced at will.
 
 ## Installation
 
-### Library
+Library:
 
 ```
 oppm install libsyslog
 ```
 
-### Daemon
+Daemon:
 
 ```
 oppm install syslogd
@@ -33,7 +33,7 @@ The syslog library only provides one function, so the library can be called. In 
 
 An example using syslog as both a function and a table:
 
-```
+```lua
 local syslog = require "syslog"
 syslog("message", syslog.emergency, "service name")
 ```
@@ -50,16 +50,18 @@ rc syslogd reload
 
 In addition, the daemon keeps a configuration file in */etc/syslogd.cfg*. This is stored as a Lua table and may be edited in whatever way you see fit. It has the following fields and default values:
 
- - port: 514
- - relay: false
- - relayhost: ""
- - receive: false
- - write: true
- - destination: "/dev/null"
- - minlevel: 6
- - beeplevel: -1
- - displevel: 2
- - filter: {}
+|Field		| Default value	|
+| ---		| ---		|
+|port		| 514		|
+|relay		| false		|
+|relayhost	| ""		|
+|receive	| false		|
+|write		| true		|
+|destination	| "/dev/null"	|
+|minlevel	| 6		|
+|beeplevel	| -1		|
+|displevel	| 2		|
+|filter		| {}		|
 
 ## Technical details
 
