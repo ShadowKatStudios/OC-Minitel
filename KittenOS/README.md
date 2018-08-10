@@ -24,13 +24,12 @@ Due to how KittenOS's security model works, you have to initialise the library i
 
 ```
 local minitel = neo.requireAccess("x.svc.minitel","minitel daemon access")
-local computer = neo.requireAccess("k.computer","pushing packets")
 local event = require("event")(neo)
 
-local net = require("net")(event,computer,minitel)
+local net = require("net")(event,minitel)
 ```
 
-This gives access to the event API, computer API and Minitel service to the net library.
+This gives access to the event API and Minitel service to the net library.
 
 ### API
 
@@ -42,7 +41,7 @@ Being a direct port of the OpenOS version, the API is the same.
 
 *net.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
 
-*net.rsend(host, port, data)* - Sends a reliable packet to *host* on *port* containing *data*.
+*net.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply.
 
 #### Layer 4
 
