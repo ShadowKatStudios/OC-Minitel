@@ -1,0 +1,19 @@
+# syslog Library for OpenOS
+
+The syslog library only provides one function, so the library can be called. In addition, the library provides a number of pre-configured event levels:
+
+ - syslog.emergency 
+ - syslog.alert 
+ - syslog.critical 
+ - syslog.error 
+ - syslog.warning 
+ - syslog.notice 
+ - syslog.info 
+ - syslog.debug 
+
+An example using syslog as both a function and a table:
+
+```lua
+local syslog = require "syslog"
+syslog("message", syslog.emergency, "service name")
+```

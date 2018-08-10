@@ -1,0 +1,24 @@
+# syslog Daemon for OpenOS
+
+The syslog daemon lives in */etc/rc.d/syslogd.lua*, and as such is managed as an rc program:
+
+```
+rc syslogd enable
+rc syslogd start
+rc syslogd reload
+```
+
+In addition, the daemon keeps a configuration file in */etc/syslogd.cfg*. This is stored as a Lua table and may be edited in whatever way you see fit. It has the following fields and default values:
+
+|Field		| Default value	|
+| ---		| ---		|
+|port		| 514		|
+|relay		| false		|
+|relayhost	| ""		|
+|receive	| false		|
+|write		| true		|
+|destination	| "/dev/null"	|
+|minlevel	| 6		|
+|beeplevel	| -1		|
+|displevel	| 2		|
+|filter		| {}		|
