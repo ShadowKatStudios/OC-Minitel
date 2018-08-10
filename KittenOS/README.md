@@ -1,5 +1,5 @@
 # Minitel for KittenOS NEO
-This package includes the Minitel service, in apps/svc-minitel.lua, and the net library, in libs/net.lua.
+This package includes the Minitel service, in apps/svc-minitel.lua, and the net library, in libs/minitel.lua.
 
 ## Minitel service
 
@@ -16,7 +16,7 @@ The net library provides an easy way of interacting with the minitel service, an
 
 ### Installation
 
-Place libs/net.lua into `NEO Disk/libs/net.lua`
+Place libs/minitel.lua into `NEO Disk/libs/minitel.lua`
 
 ### Usage
 
@@ -26,7 +26,7 @@ Due to how KittenOS's security model works, you have to initialise the library i
 local minitel = neo.requireAccess("x.svc.minitel","minitel daemon access")
 local event = require("event")(neo)
 
-local net = require("net")(event,minitel)
+local net = require("minitel")(event,minitel)
 ```
 
 This gives access to the event API and Minitel service to the net library.
