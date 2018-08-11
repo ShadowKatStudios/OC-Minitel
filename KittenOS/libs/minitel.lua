@@ -1,6 +1,8 @@
-function returnNet(event,computer,minitel)
+function returnNet(event,minitel)
 
 local dbug = false
+local computer = {}
+computer.uptime = os.uptime
 
 function print(...)
  if dbug then
@@ -49,9 +51,10 @@ function net.usend(to,port,data,npID)
  minitel.sendPacket(0,to,port,data,npID)
 end
 
-function net.rsend(to,port,data)
+function net.rsend(to,port,data,block)
  local pid, stime = net.genPacketID(), computer.uptime() + net.streamdelay
- computer.pushSignal("net_send",1,to,port,data,pid)
+ minitel.sendPacket(1,to,port,data,pid)
+ if block then return pid end
  repeat
   _,rpid = svcpull("net_ack")
  until rpid == pid or computer.uptime() > stime
@@ -117,7 +120,7 @@ local function socket(addr,port,sclose) -- todo, add remote closing of sockets
 end
 
 function net.open(to,port)
- net.rsend(to,port,"openstream")
+ if not net.rsend(to,port,"openstream") then return false, "no ack from host" end
  local st = computer.uptime()+net.streamdelay
  local est = false
  while true do
