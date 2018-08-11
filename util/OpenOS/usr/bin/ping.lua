@@ -1,4 +1,4 @@
-local net = require "net"
+local net = require "minitel"
 local computer = require "computer"
 local event = require "event"
 

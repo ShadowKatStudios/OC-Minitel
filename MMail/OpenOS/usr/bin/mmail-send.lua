@@ -1,4 +1,4 @@
-local net = require "net"
+local net = require "minitel"
 
 local tArgs = {...}
 local hostname = io.open("/etc/hostname","rb"):read()

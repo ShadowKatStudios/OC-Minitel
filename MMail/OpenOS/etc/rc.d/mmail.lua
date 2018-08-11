@@ -1,4 +1,4 @@
-local net = require "net"
+local net = require "minitel"
 local fs = require "filesystem"
 local event = require "event"
 
