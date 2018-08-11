@@ -4,63 +4,70 @@ local computer = require "computer"
 local shell = require "shell"
 
 local hostname = os.getenv("HOSTNAME")
-local cfgfile = "/etc/minitel.cfg"
-local cfg = {}
-cfg.debug = false
-cfg.port = 4096
-cfg.retry = 10
-cfg.retrycount = 64
-cfg.route = true
-cfg.rctime = 15
-cfg.pctime = 30
-cfg.sroutes = {}
-
 local args, ops = shell.parse(...)
+local cfgfile = args[1]
+local cfg = {}
 
 local function clear()
  io.write("\27[2J\27[H")
 end
 
-local fobj = io.open(cfgfile, "rb")
-if fobj then
+if cfgfile then -- if a config file argument is specified, load it
+ local fobj = io.open(cfgfile, "rb")
+ if not fobj then
+  print("Error: couldn't open file")
+  return false
+ end
  cfg = serial.unserialize(fobj:read("*a"))
-end
+ fobj:close()
+ if not cfg then
+  print("Error: couldn't unserialize file")
+  return
+ end
+else -- if not, set the hostname and edit the minitel config file
+ -- you could just replace this whole block with an error message I guess, but let's default to configuring minitel
+ cfgfile = "/etc/minitel.cfg"
+ if not hostname then
+  print("Hostname not configured.")
+  hostname = computer.address():sub(1,8)
+  io.write("New hostname? ["..hostname.."] ")
+  local nhostname = io.read()
+  if nhostname:len() > 0 then
+   hostname = nhostname
+  end
+  local fobj = io.open("/etc/hostname","wb")
+  if fobj then
+   fobj:write(hostname)
+   fobj:close()
+  end
+  os.execute("hostname --update")
+  print("Hostname set to "..hostname..". Press any key to continue.")
+  event.pull("key_down")
+ end
+ 
+ if ops.firstrun then -- if --firstrun, quit now
+  os.execute("rc minitel enable")
+  print("Run mtcfg to configure advanced settings.")
+  return false
+ end
 
-if not hostname then
- local fobj = io.open("/etc/hostname","rb")
+ cfg.debug = false -- some default settings
+ cfg.port = 4096
+ cfg.retry = 10
+ cfg.retrycount = 64
+ cfg.route = true
+ cfg.rctime = 15
+ cfg.pctime = 30
+ cfg.sroutes = {}
+ 
+ local fobj = io.open(cfgfile, "rb") -- attempt to replace the default settings
  if fobj then
-  hostname = fobj:read()
+  cfg = serial.unserialize(fobj:read("*a")) or cfg
   fobj:close()
  end
 end
 
-clear()
-
-if not hostname then
- print("Hostname not configured.")
- hostname = computer.address():sub(1,8)
- io.write("New hostname? ["..hostname.."] ")
- local nhostname = io.read()
- if nhostname:len() > 0 then
-  hostname = nhostname
- end
- local fobj = io.open("/etc/hostname","wb")
- if fobj then
-  fobj:write(hostname)
-  fobj:close()
- end
- os.execute("hostname --update")
- print("Hostname set to "..hostname..". Press any key to continue.")
- event.pull("key_down")
-end
-
-if ops.firstrun then
- os.execute("rc minitel enable")
- print("Run mtcfg to configure advanced settings.")
- return
-end
-
-local keytab = {}
+local keytab = {} -- contains the keys because we don't want to work with the table indices directly
 for k,v in pairs(cfg) do
  if type(v) ~= "table" then
   keytab[#keytab+1] = k
@@ -101,7 +108,7 @@ local function editsetting(k)
  end
 end
 
-while run do
+while run do -- main loop
  drawmenu()
  local _,_, ch, co = event.pull("key_down")
  if ch == 113 and co == 16 then
@@ -139,6 +146,3 @@ if fobj then
  fobj:close()
  print("Settings successfully written!")
 end
-
-print("Enabling daemon...")
-os.execute("rc minitel enable")
