@@ -1,7 +1,7 @@
 local event = require "event"
 local serial = require "serialization"
 local computer = require "computer"
-local havenet, net = pcall(require,"net")
+local havenet, net = pcall(require,"minitel")
 
 local hostname = os.getenv("HOSTNAME") or computer.address:sub(1,8)
 local cfg = {}
