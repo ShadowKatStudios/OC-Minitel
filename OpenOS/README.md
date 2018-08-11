@@ -1,6 +1,6 @@
 # Minitel for OpenOS
 
-This package includes the Minitel daemon, in etc/rc.d/minitel.lua, and the net library for using minitel, in usr/lib/net.lua.
+This package includes the Minitel daemon, in etc/rc.d/minitel.lua, and the minitel library for using minitel, in usr/lib/minitel.lua.
 
 ## Minitel daemon
 
@@ -39,29 +39,29 @@ To change a setting, one invokes:
 
 In addition, one can invoke to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
 
-## Net library
+## Minitel library
 
-The net library provides an easy way of interacting with the minitel daemon, and implements higher-level features of the stack.
+The minitel library provides an easy way of interacting with the minitel daemon, and implements higher-level features of the stack.
 
 ### API
 
 #### Layer 3
 
-*net.genPacketID()* - returns a string of random data
+*minitel.genPacketID()* - returns a string of random data
 
-*net.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
+*minitel.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
 
-*net.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply.
+*minitel.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply.
 
 #### Layer 4
 
-*net.send(host, port, data)* - Sends *data* reliably and in order to *host* on *port*.
+*minitel.send(host, port, data)* - Sends *data* reliably and in order to *host* on *port*.
 
 #### Layer 5
 
-*net.open(to,port)* - Establishes a stream to *host* on *port* and returns a stream object
+*minitel.open(to,port)* - Establishes a stream to *host* on *port* and returns a stream object
 
-*net.listen(port)* - Waits for another node to establish a stream, and returns the stream object.
+*minitel.listen(port)* - Waits for another node to establish a stream, and returns the stream object.
 
 #### Stream objects
 
@@ -73,10 +73,10 @@ The net library provides an easy way of interacting with the minitel daemon, and
 
 #### Variables
 
-*net.mtu = 4096* - The maximum length of the data portion of a packet for *net.send*
+*minitel.mtu = 4096* - The maximum length of the data portion of a packet for *minitel.send*
 
-*net.streamdelay = 60* - The time, in seconds, *net.open* will wait for a response while trying to establish a connection.
+*minitel.streamdelay = 60* - The time, in seconds, *minitel.open* will wait for a response while trying to establish a connection.
 
-*net.minport = 32768* - The lowest port *net.listen* will allocate to a new connection.
+*minitel.minport = 32768* - The lowest port *minitel.listen* will allocate to a new connection.
 
-*net.maxport = 65535* - The highest port *net.listen* will allocate to a new connection.
+*minitel.maxport = 65535* - The highest port *minitel.listen* will allocate to a new connection.
