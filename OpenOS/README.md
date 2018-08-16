@@ -67,7 +67,12 @@ The minitel library provides an easy way of interacting with the minitel daemon,
 
 *stream:write(data)* - Sends *data* to the node at the other end of the stream
 
-*stream:read(length)* - Reads data from the stream, up to *length* bytes.
+*stream:read(length)* - Reads data from the stream, in several modes:
+
+- If you pass *length* as a number, up to *length* bytes will be read from the socket.
+- If *length* == "\*a", everything in the buffer will be returned.
+- If you pass *length* as any other string, and there is *length* in the buffer somewhere, the data up to *length* in the buffer will be returned. This ignores all but the first character.
+- If *length* is nil, it will read up until the next newline.
 
 *stream:close()* - Ends the stream and prevents further writing.
 

@@ -59,10 +59,26 @@ local function cwrite(self,data)
  end
 end
 local function cread(self,length)
+ length = length or "\n"
  local rdata = ""
- rdata = self.rbuffer:sub(1,length)
- self.rbuffer = self.rbuffer:sub(length+1)
- return rdata
+ if type(length) == "number" then
+  rdata = self.rbuffer:sub(1,length)
+  self.rbuffer = self.rbuffer:sub(length+1)
+  return rdata
+ elseif type(length) == "string" then
+  if length:sub(1,2) == "*a" then
+   rdata = self.rbuffer
+   self.rbuffer = ""
+   return rdata
+  elseif length:len() == 1 then
+   local pre, post = self.rbuffer:match("(.-)"..length.."(.*)")
+   if pre and post then
+    self.rbuffer = post
+    return pre
+   end
+   return nil
+  end
+ end
 end
 
 local function socket(addr,port,sclose)
