@@ -12,6 +12,15 @@ local function clear()
  io.write("\27[2J\27[H")
 end
 
+local function writecfg()
+ local fobj = io.open(cfgfile, "wb")
+ if fobj then
+  fobj:write(serial.serialize(cfg))
+  fobj:close()
+  print("Settings successfully written!")
+ end
+end
+
 if cfgfile then -- if a config file argument is specified, load it
  local fobj = io.open(cfgfile, "rb")
  if not fobj then
@@ -44,12 +53,6 @@ else -- if not, set the hostname and edit the minitel config file
   print("Hostname set to "..hostname..". Press any key to continue.")
   event.pull("key_down")
  end
- 
- if ops.firstrun then -- if --firstrun, quit now
-  os.execute("rc minitel enable")
-  print("Run mtcfg to configure advanced settings.")
-  return false
- end
 
  cfg.debug = false -- some default settings
  cfg.port = 4096
@@ -59,6 +62,18 @@ else -- if not, set the hostname and edit the minitel config file
  cfg.rctime = 15
  cfg.pctime = 30
  cfg.sroutes = {}
+ 
+ if ops.firstrun then -- if --firstrun, quit now
+  io.write("Should this machine route packets?\nThis should be disabled on large networks.\n\nRoute packets? [Y/n]: ")
+  local rp = io.read:lower():sub(1,1)
+   if rp == "n" then
+   cfg.route = false
+  end
+  os.execute("rc minitel enable")
+  writecfg()
+  print("Run mtcfg to configure advanced settings.")
+  return false
+ end
  
  local fobj = io.open(cfgfile, "rb") -- attempt to replace the default settings
  if fobj then
@@ -140,9 +155,3 @@ end
 
 print("Writing settings...")
 
-local fobj = io.open(cfgfile, "wb")
-if fobj then
- fobj:write(serial.serialize(cfg))
- fobj:close()
- print("Settings successfully written!")
-end
