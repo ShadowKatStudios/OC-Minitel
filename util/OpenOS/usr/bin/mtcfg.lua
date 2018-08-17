@@ -65,7 +65,7 @@ else -- if not, set the hostname and edit the minitel config file
  
  if ops.firstrun then -- if --firstrun, quit now
   io.write("Should this machine route packets?\nThis should be disabled on large networks.\n\nRoute packets? [Y/n]: ")
-  local rp = io.read:lower():sub(1,1)
+  local rp = io.read():lower():sub(1,1)
    if rp == "n" then
    cfg.route = false
   end
