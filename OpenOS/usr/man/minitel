@@ -39,6 +39,26 @@ To change a setting, one invokes:
 
 In addition, one can invoke to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
 
+### Usage
+
+The Minitel daemon handles both sending and receiving packets, via events. There are four types of events used:.
+
+#### net\_msg, *from*, *port*, *data*
+
+This event is triggered when the Minitel daemon receives a data (type 0 or 1) packet.
+
+#### net\_ack, *packet ID*
+
+This event is triggered when the Minitel daemon receives an acknowledgement (type 2) packet.
+
+#### net\_broadcast, *from*, *port*, *data*
+
+This event is triggered when the Minitel daemon receives a broadcast (addressed to '~') packet of type 1 or 2.
+
+#### net\_send, *packet type*, *to*, *port*, *data*, *packet ID*
+
+This event can be queued (with computer.pushSignal) to manually build packets. While you should never need to use this, it may be useful for certain edge cases.
+
 ## Minitel library
 
 The minitel library provides an easy way of interacting with the minitel daemon, and implements higher-level features of the stack.
