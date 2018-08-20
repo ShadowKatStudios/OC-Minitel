@@ -39,7 +39,7 @@ To change a setting, one invokes:
 
 In addition, one can invoke to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
 
-### Usage
+### Events
 
 The Minitel daemon handles both sending and receiving packets, via events. There are four types of events used:.
 
