@@ -1,24 +1,30 @@
 local net = require "minitel"
-local event = require "event"
 local syslog = require "syslog"
 local fs = require "filesystem"
-local computer = require "computer"
-local serial = require "serialization"
+local event = require "event"
 
-local sockets = {}
+local coro = {} -- table of coroutines, one per socket
 local cfg = {}
-cfg.path = "/srv"
-cfg.looptime = 0.5
-local timer = false
+local timer, listener
+local isRunning = false -- simple lock
+
+cfg.path = "/srv" -- default config
+cfg.port = 70
+cfg.looptimer = 0.5
 
 local function log(msg,level)
  syslog(msg,level,"frequestd")
 end
 
-local function loadConfig()
+local function loadConfig() -- load config from file
  local fobj = io.open("/etc/fserv.cfg","rb")
  if fobj then
-  cfg = serial.unserialize(fobj:read("*a")) or cfg
+  local ncfg = serial.unserialize(fobj:read("*a"))
+  if ncfg then
+   for k,v in pairs(ncfg) do
+    cfg[k] = v
+   end
+  end
   fobj:close()
  end
 end
@@ -31,107 +37,102 @@ local function writeConfig()
  end
 end
 
---[[
-overview of how this works:
-socketHandler listens for connections on port 70, places them into the sockets table
-socketLoop runs quite regularly - every cfg.looptime or so.
-It iterates over each socket in the sockets table, and if any of them contain a valid request, it attempts to handle it:
-- calls getFile to get a status code and file contents if applicable
-- writes either a failure code and message, the file contents, or the file size
-Previously this was based on a listener but that caused a race condition
-
-note to self: consider using the FS library for handling stat requests, and returning an iterator instead of an entire file for transfer requests
-]]--
-
-local function getFile(path)
- path = cfg.path .. path
- if not fs.exists(path) then
-  log(path.." not found",syslog.notice)
-  return "n",path.." not found"
- end
- if fs.isDirectory(path) then
-  local dlist = ""
-  for file in fs.list(path) do
-   dlist = dlist .. file .. "\n"
+local function handleSocket(sock) -- create a coroutine for a new socket
+ coro[#coro+1] = coroutine.create(function()
+  local line
+  repeat
+   coroutine.yield()
+   line = sock:read()
+  until line
+  local ttype, path = line:match("([ts])(.+)")
+  if not ttype or not path then
+   sock:write("fIncomplete request")
+   sock:close()
+   return false
   end
-  return "d", dlist
- end
- local f = io.open(path,"rb")
- if not f then
-  log("unable to open "..path,syslog.notice)
-  return "f","unable to open "..path
- end
- local content = f:read("*a")
- f:close()
- return "y", content
-end
-
-local function socketLoop()
- for sn,socket in pairs(sockets) do
-  local op, path = socket.rbuffer:match("([ts])(.+)\n")
-  if op and path then
-   path = fs.canonical(path)
-   if path:sub(1,1) ~= "/" then
-    path = "/" .. path
+  path = fs.canonical(cfg.path.."/"..fs.canonical(path))
+  sock.cname = sock.addr..":"..tostring(sock.port)
+  log("["..sock.cname.."] "..ttype.." "..path,6)
+  if ttype == "t" then -- transfer request
+   if not fs.exists(path) then
+    sock:write("nFile not found.")
+    sock:close()
+    log("["..sock.cname.."] Not found.",7)
+    return
    end
-   log("client "..tostring(socket.addr)..":"..tostring(socket.port).." requested "..path, syslog.debug)
-   if op == "t" and path then
-    local wf, file = getFile(path)
-    socket:write(wf .. file)
-    socket:close()
-    sockets[sn] = nil
-   elseif op == "s" and path then
-    local wf, file = getFile(path)
-    if wf == "y" then
-     socket:write(wf..file:len())
-    else
-     socket:write(wf..file)
+   if fs.isDirectory(path) then
+    local rs = "d"
+    for file in fs.list(path) do
+     rs = rs..file.."\n"
     end
-    socket:close()
-    sockets[sn] = nil
+    sock:write(rs)
+    sock:close()
+    log("["..sock.cname.."] Directory.",7)
+    return
+   end
+   local f = io.open(path,"rb")
+   if not f then
+    sock:write("fUnable to open file for reading",7)
+    sock:close()
+    return
+   end
+   sock:write("y")
+   log("["..sock.cname.."] Transferring file.",7)
+   local chunk = f:read(net.mtu)
+   repeat
+    sock:write(chunk)
+    coroutine.yield()
+    chunk = f:read(net.mtu)
+   until not chunk
+   sock:close()
+   f:close()
+   log("["..sock.cname.."] file transferred.",7)
+  elseif ttype == "s" then -- stat request
+   if fs.exists(path) then
+    local ftype = "f"
+    if fs.isDirectory(path) then
+     ftype = "d"
+    end
+    sock:write("y"..ftype..tostring(fs.size(path)))
+    sock:close()
+    log("["..sock.cname.."] stat request returned.",7)
+   else
+    sock:write("nFile not found.",7)
+    sock:close()
+    log("["..sock.cname.."] Not found.",7)
    end
   end
-  if computer.uptime() > socket.opened + 60 then
-   socket:close()
-   sockets[sn] = nil
-   log("dropped client "..tostring(socket.addr)..":"..tostring(socket.port).." for inactivity",syslog.debug)
-  elseif socket.state ~= "open" then
-   sockets[sn] = nil
-   log("client "..tostring(socket.addr)..":"..tostring(socket.port).." closed socket",syslog.debug)
-  end
- end
+ end)
+ log("New connection: "..sock.addr..":"..tostring(sock.port),7)
 end
 
-local function socketHandler(socket)
- log(tostring(socket.addr)..":"..tostring(socket.port).." opened",syslog.debug)
- socket.opened = computer.uptime()
- sockets[tostring(socket.addr)..":"..tostring(socket.port)] = socket
+local function sched() -- run coroutines
+ if isRunning then return end
+ isRunning = true
+ for i = #coro, 1, -1 do -- prune dead coroutines
+  if coroutine.status(coro[i]) == "dead" then
+   table.remove(coro,i)
+  end
+ end
+ for k,v in pairs(coro) do
+  coroutine.resume(v)
+ end
+ isRunning = false
 end
 
 function start()
+ if timer or listener then return end
  loadConfig()
  writeConfig()
- net.flisten(70, socketHandler)
- timer = event.timer(cfg.looptime, socketLoop, math.huge)
+ timer = event.timer(cfg.looptimer, sched, math.huge)
+ listener = net.flisten(cfg.port, handleSocket)
 end
-
 function stop()
- event.ignore("net_msg", socketLoop)
+ if not timer or not listener then return end
  event.cancel(timer)
+ event.ignore("net_msg",listener)
 end
-
-function set(k,v)
- if type(cfg[k]) == "string" then
-  cfg[k] = v
- elseif type(cfg[k]) == "number" then
-  cfg[k] = tonumber(v)
- elseif type(cfg[k]) == "boolean" then
-  if v:lower():sub(1,1) == "t" then
-   cfg[k] = true
-  else
-   cfg[k] = false
-  end
- end
- print("cfg."..k.." = "..tostring(cfg[k]))
- writeConfig()
+function restart()
+ stop()
+ start()
 end
