@@ -1,7 +1,11 @@
 # Minitel
 An easy-to-implement networking protocol for OpenComputers. Not to be confused with the [French computer network of the same name](https://en.wikipedia.org/wiki/Minitel).
 
+![Minitel ad](https://oc.shadowkat.net/img/minitel-ad.jpg)
+
 Minitel aims to implement layers 3, 4 and 5 of the OSI model.
+
+![Layer organisation in Minitel](https://oc.shadowkat.net/img/minitel-layers.png)
 
 ## Layers
 ### Layer 3
