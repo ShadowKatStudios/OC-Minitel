@@ -7,7 +7,7 @@ Minitel aims to implement layers 3, 4 and 5 of the OSI model.
 
 
 ## Layers
-![Layer organisation in Minitel](img/minitel-layers.png)
+![Layer organisation in Minitel](img/minitel-layers.svg)
 ### Layer 3
 [Layer 3](protocol-3.md) implements addressing, meshing and datagram transmission.
 
