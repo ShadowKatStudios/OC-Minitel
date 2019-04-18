@@ -71,7 +71,7 @@ The minitel library provides an easy way of interacting with the minitel daemon,
 
 *minitel.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
 
-*minitel.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply.
+*minitel.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply, instead return the packet ID.
 
 #### Layer 4
 
