@@ -19,8 +19,8 @@ function net.usend(to,port,data,npID)
  computer.pushSignal("net_send",0,to,port,data,npID)
 end
 
-function net.rsend(to,port,data,block)
- local pid, stime = net.genPacketID(), computer.uptime() + net.streamdelay
+function net.rsend(to,port,data,block,npID)
+ local pid, stime = npID or net.genPacketID(), computer.uptime() + net.streamdelay
  computer.pushSignal("net_send",1,to,port,data,pid)
  if block then return false end
  repeat
