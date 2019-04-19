@@ -12,7 +12,7 @@ Upon a node receiving a message addressed to itself, it should:
 2. Check if the packet is addressed to the node, and if so, queue it as a net_msg event
 3. If the packet is indeed addressed to this node, and the packet type is 1 (reliable), send an acknowledgement packet.
 4. Optional: Add the sender to the address cache if it isn't already in the cache
-5. Optional: If the packet is addressed to a different node, repeat the packet, preferably respecting the address cache
+5. Optional: If the packet is addressed to a different node, repeat the packet via all wireless modems and all wired/linked modems except the one receiving the packet, preferably respecting the address cache
 
 If the packet is, for some reason invalid, simply drop the packet.
 

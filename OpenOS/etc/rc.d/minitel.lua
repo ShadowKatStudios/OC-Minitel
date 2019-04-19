@@ -19,10 +19,11 @@ local event = require "event"
 local component = require "component"
 local computer = require "computer"
 local serial = require "serialization"
+
 local hostname = computer.address():sub(1,8)
-local listener = false
-cfg.debug = false
 local modems = {}
+
+cfg.debug = false
 cfg.port = 4096
 cfg.retry = 10
 cfg.retrycount = 64
@@ -91,7 +92,9 @@ function start()
   f:close()
  end
  print("Hostname: "..hostname)
- if listener then return end
+
+ if next(listeners) ~= nil then return end
+
  modems={}
  for a,t in component.list("modem") do
   modems[#modems+1] = component.proxy(a)
@@ -112,7 +115,7 @@ function start()
   return npID
  end
  
- local function sendPacket(packetID,packetType,dest,sender,vPort,data)
+ local function sendPacket(packetID,packetType,dest,sender,vPort,data,repeatingFrom)
   if rcache[dest] then
    dprint("Cached", rcache[dest][1],"send",rcache[dest][2],cfg.port,packetID,packetType,dest,sender,vPort,data)
    if component.type(rcache[dest][1]) == "modem" then
@@ -123,10 +126,14 @@ function start()
   else
    dprint("Not cached", cfg.port,packetID,packetType,dest,sender,vPort,data)
    for k,v in pairs(modems) do
-    if v.type == "modem" then
-     v.broadcast(cfg.port,packetID,packetType,dest,sender,vPort,data)
-    elseif v.type == "tunnel" then
-     v.send(packetID,packetType,dest,sender,vPort,data)
+    -- do not send message back to the wired or linked modem it came from
+    -- the check for tunnels is for short circuiting `v.isWireless()`, which does not exist for tunnels
+    if v.address ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless()) then
+     if v.type == "modem" then
+      v.broadcast(cfg.port,packetID,packetType,dest,sender,vPort,data)
+     elseif v.type == "tunnel" then
+      v.send(packetID,packetType,dest,sender,vPort,data)
+     end
     end
    end
   end
@@ -177,7 +184,7 @@ function start()
    elseif dest:sub(1,1) == "~" then -- broadcasts start with ~
     computer.pushSignal("net_broadcast",sender,vPort,data)
    elseif cfg.route then -- repeat packets if route is enabled
-    sendPacket(packetID,packetType,dest,sender,vPort,data)
+    sendPacket(packetID,packetType,dest,sender,vPort,data,localModem)
    end
    if not rcache[sender] then -- add the sender to the rcache
     dprint("rcache: "..sender..":", localModem,from,computer.uptime())
@@ -233,10 +240,12 @@ end
 function stop()
  for k,v in pairs(listeners) do
   event.ignore(k,v)
+  listeners[k] = nil
   print("Stopped listener: "..tostring(v))
  end
  for k,v in pairs(timers) do
   event.cancel(v)
+  timers[k] = nil
   print("Stopped timer: "..tostring(v))
  end
 end
