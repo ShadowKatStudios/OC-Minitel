@@ -40,10 +40,8 @@ sender: original sender of packet
 data: the actual packet data, duh.
 ]]--
 
-local listeners = {}
 local timers = {}
 local hostname = computer.address():sub(1,8)
-local listener = false
 local dbug = false
 local modems = {}
 local port = 4096
@@ -112,7 +110,7 @@ local function genPacketID()
  return npID
 end
 
-local function sendPacket(packetID,packetType,dest,sender,vport,data)
+local function sendPacket(packetID,packetType,dest,sender,vport,data,repeatingFrom)
  if rcache[dest] then
   dprint("Cached", rcache[dest][1],"send",rcache[dest][2],port,packetID,packetType,dest,sender,vport,data)
   if modems[rcache[dest][1]].type == "modem" then
@@ -123,10 +121,14 @@ local function sendPacket(packetID,packetType,dest,sender,vport,data)
  else
   dprint("Not cached", port,packetID,packetType,dest,sender,vport,data)
   for k,v in pairs(modems) do
-   if v.type == "modem" then
-    v.broadcast(port,packetID,packetType,dest,sender,vport,data)
-   elseif v.type == "tunnel" then
-    v.send(packetID,packetType,dest,sender,vport,data)
+   -- do not send message back to the wired or linked modem it came from
+   -- the check for tunnels is for short circuiting `v.isWireless()`, which does not exist for tunnels
+   if v.address ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless()) then
+    if v.type == "modem" then
+     v.broadcast(port,packetID,packetType,dest,sender,vPort,data)
+    elseif v.type == "tunnel" then
+     v.send(packetID,packetType,dest,sender,vPort,data)
+    end
    end
   end
  end
