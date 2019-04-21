@@ -5,8 +5,18 @@ local shell = require "shell"
 
 local hostname = os.getenv("HOSTNAME")
 local args, ops = shell.parse(...)
-local cfgfile = args[1]
+local cfgfile = args[1] or "/etc/minitel.cfg"
+local firstrun = false
+
 local cfg = {}
+cfg.debug = false -- some default settings
+cfg.port = 4096
+cfg.retry = 10
+cfg.retrycount = 64
+cfg.route = true
+cfg.rctime = 15
+cfg.pctime = 30
+cfg.sroutes = {}
 
 local function clear()
  io.write("\27[2J\27[H")
@@ -20,30 +30,33 @@ local function writecfg()
   print("Settings successfully written!")
  end
 end
-
-if cfgfile then -- if a config file argument is specified, load it
- local fobj = io.open(cfgfile, "rb")
+local function loadcfg(fn)
+ local fobj = io.open(fn, "rb")
  if not fobj then
-  print("Error: couldn't open file")
+  print("Error: couldn't open config file")
   return false
  end
- cfg = serial.unserialize(fobj:read("*a"))
+ ncfg = serial.unserialize(fobj:read("*a"))
  fobj:close()
- if not cfg then
-  print("Error: couldn't unserialize file")
-  return
+ if not ncfg then
+  print("Error: couldn't unserialize config file")
+  return false
  end
-else -- if not, set the hostname and edit the minitel config file
- -- you could just replace this whole block with an error message I guess, but let's default to configuring minitel
- cfgfile = "/etc/minitel.cfg"
- if not hostname then
-  print("Hostname not configured.")
-  hostname = computer.address():sub(1,8)
-  io.write("New hostname? ["..hostname.."] ")
-  local nhostname = io.read()
-  if nhostname:len() > 0 then
-   hostname = nhostname
-  end
+ for k,v in pairs(ncfg) do
+  cfg[k] = v
+ end
+ return true
+end
+
+firstrun = not loadcfg(cfgfile)
+
+if not hostname then
+ print("Hostname not configured. If not set, the hostname will default to the first 8 characters of the computer's address, shown below.")
+ hostname = computer.address():sub(1,8)
+ io.write("New hostname? ["..hostname.."] ")
+ local nhostname = io.read()
+ if nhostname:len() > 0 then
+  hostname = nhostname
   local fobj = io.open("/etc/hostname","wb")
   if fobj then
    fobj:write(hostname)
@@ -51,35 +64,20 @@ else -- if not, set the hostname and edit the minitel config file
   end
   os.execute("hostname --update")
   print("Hostname set to "..hostname..". Press any key to continue.")
-  event.pull("key_down")
  end
+end
 
- cfg.debug = false -- some default settings
- cfg.port = 4096
- cfg.retry = 10
- cfg.retrycount = 64
- cfg.route = true
- cfg.rctime = 15
- cfg.pctime = 30
- cfg.sroutes = {}
- 
- if ops.firstrun then -- if --firstrun, quit now
-  io.write("Should this machine route packets?\nThis should be disabled on large networks.\n\nRoute packets? [Y/n]: ")
-  local rp = io.read():lower():sub(1,1)
-   if rp == "n" then
-   cfg.route = false
-  end
-  os.execute("rc minitel enable")
-  writecfg()
-  print("Run mtcfg to configure advanced settings.")
-  return false
+if firstrun then -- if first run, quit now
+ io.write("Should this machine route packets?\nThis may cause issues in dense wireless networks.\n\nRoute packets? [Y/n]: ")
+ local rp = io.read():lower():sub(1,1)
+  if rp == "n" then
+  cfg.route = false
  end
- 
- local fobj = io.open(cfgfile, "rb") -- attempt to replace the default settings
- if fobj then
-  cfg = serial.unserialize(fobj:read("*a")) or cfg
-  fobj:close()
- end
+ os.execute("rc minitel enable")
+ writecfg()
+ print("Your hostname is "..hostname..".")
+ print("Run mtcfg to configure advanced settings.")
+ return false
 end
 
 local keytab = {} -- contains the keys because we don't want to work with the table indices directly
@@ -153,5 +151,5 @@ if not config then
  return
 end
 
-print("Writing settings...")
-
+print("Writing settings for host "..hostname.."...")
+writecfg()
