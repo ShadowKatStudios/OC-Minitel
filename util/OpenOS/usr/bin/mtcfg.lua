@@ -74,6 +74,7 @@ if firstrun then -- if first run, quit now
   cfg.route = false
  end
  os.execute("rc minitel enable")
+ os.execute("rc minitel start")
  writecfg()
  print("Your hostname is "..hostname..".")
  print("Run mtcfg to configure advanced settings.")
