@@ -2,6 +2,7 @@ local net = require "minitel"
 local syslog = require "syslog"
 local fs = require "filesystem"
 local event = require "event"
+local serial = require "serialization"
 
 local coro = {} -- table of coroutines, one per socket
 local cfg = {}
