@@ -9,6 +9,8 @@ echo ufs.lua
 lua minify.lua ufs.lua mini-ufs.lua
 echo init-wrapper.lua
 lua minify.lua init-wrapper.lua mini-init-wrapper.lua
+echo dlfs.lua
+lua minify.lua dlfs.lua mini-dlfs.lua
 echo microtel-3.lua
 lua minify.lua microtel/microtel-3.lua microtel/mini-microtel-3.lua
 echo microtel-4.lua
@@ -27,3 +29,6 @@ cat microtel/mini-microtel-{3,4,5-core,5-open}.lua mini-vt100.lua mini-minipromp
 lua minify.lua nminiprompt.lua mini-nminiprompt.lua
 echo -e "GC,UC=component,computer" | cat - mini-nminiprompt.lua > mini-fnminiprompt.lua
 mv mini-fnminiprompt.lua mini-nminiprompt.lua
+
+cat microtel/mini-microtel-{3,4,5-core,5-open}.lua mini-fget.lua mini-dlfs.lua > mini-nbcore.lua
+cat microtel/microtel-{3,4,5-core,5-open}.lua fget.lua dlfs.lua > nbcore.lua

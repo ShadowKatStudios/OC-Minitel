@@ -1,0 +1,14 @@
+{
+ {"init","I"},
+ {"dirlist","DL"},
+ {"filelist","FL"},
+ {"host","H"},
+ {"port","P"},
+ {"line","L"},
+ {"ftype","F"},
+ {"content","K"},
+ {"filename","FN"},
+ {"table.remove","TR"},
+ {"dir","CD"},
+ {"file","CF"}
+,}
