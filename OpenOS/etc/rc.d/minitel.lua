@@ -268,7 +268,9 @@ end
 
 function set_route(to,laddr,raddr)
  cfg.sroutes[to] = {laddr,raddr,0}
+ saveconfig()
 end
 function del_route(to)
  cfg.sroutes[to] = nil
+ saveconfig()
 end
