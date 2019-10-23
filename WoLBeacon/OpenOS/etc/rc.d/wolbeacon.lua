@@ -12,7 +12,7 @@ cfg.port = 3442
 cfg.message = "WoLBeacon"
 
 local function saveConfig()
- local f = io.open("/etc/wolbeacon.lua","wb")
+ local f = io.open("/etc/wolbeacon.cfg","wb")
  if not f then
   return false
  end
@@ -27,7 +27,7 @@ local function broadcast()
 end
 
 local function loadConfig()
- local f = io.open("/etc/wolbeacon.lua","rb")
+ local f = io.open("/etc/wolbeacon.cfg","rb")
  if not f then
   saveConfig()
   return false

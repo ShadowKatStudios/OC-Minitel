@@ -1,0 +1,27 @@
+# WoLBeacon for OpenOS
+
+WoLBeacon is an OpenOS rc daemon to wake other machines up, and make sure yours can be woken up.
+
+## Usage
+
+WoLBeacon can be managed as an rc service:
+
+```
+rc wolbeacon start
+rc wolbeacon stop
+rc wolbeacon reload
+rc wolbeacon enable
+rc wolbeacon disable
+```
+
+You will most likely want to start and enable the service.
+
+## Configuration
+
+WoLBeacon's configuration file can be found in */etc/wolbeacon.cfg*, containing a number of fields:
+
+- **broadcast**: Whether to broadcast Wake-on-LAN packets.
+- **receive**: Whether to configure the local network interfaces to receive Wake-on-LAN messages.
+- **message**: The Wake-on-LAN message to listen for and broadcast.
+- **port**: The port to broadcast Wake-on-LAN messages on.
+- **delay**: The interval between sending Wake-on-LAN messages.
