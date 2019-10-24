@@ -1,0 +1,26 @@
+# realtime-relay
+
+realtime relay daemon for OpenOS
+
+realtime-relay is both a Minitel realtime server and client; allowing both synchronisation with another machine, and other machines to synchronise with the local machine's clock.
+
+## Usage
+
+realtime-relay is implemented as an rc service, and as such, to start it one can use the usual rc commands:
+
+    rc realtime-relay start  
+    rc realtime-relay stop  
+    rc realtime-relay enable  
+    rc realtime-relay disable
+
+## Configuration
+
+realtime-relay includes a configuration file at */etc/realtime-relay.cfg*; as a Lua table. It contains the following fields:
+
+- **host**: The host to synchronise the local real-time clock with.
+- **port**: The port to communicate with *host* on.
+- **sync**: Whether to synchronise clocks with *host*.
+- **frequency**: The time between automatic time synchronisations.
+- **offset**: The offset time, in hours.
+
+By default, realtime-relay will only act as a server, as using it as a client requires both a *host* being set, and *sync* being enabled.

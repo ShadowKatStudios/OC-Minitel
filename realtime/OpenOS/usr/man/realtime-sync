@@ -1,0 +1,28 @@
+# realtime-sync
+
+realtime synchronisation daemon for OpenOS
+
+realtime-sync uses the Date: header in HTTP responses, using the Internet card, to ascertain the current real time in UTC, and updates the realtime library with this information.
+
+## Usage
+
+realtime-sync is implemented as an rc service, and as such, to start it one can use the usual rc commands:
+
+    rc realtime-sync start  
+    rc realtime-sync stop  
+    rc realtime-sync enable  
+    rc realtime-sync disable
+
+Additionally, realtime-sync includes
+
+    rc realtime-sync sync
+
+to force a re-synchronisation.
+
+## Configuration
+
+realtime-sync includes a configuration file at */etc/realtime-sync.cfg*; as a Lua table. It contains the following fields:
+
+- **url**: The URL to request to get the time. Pick one that returns UTC dates in the headers, or leave the default.
+- **offset**: The timezone offset, in hours. For example, for AEDT, use 11.
+- **frequency**: The time between automatic time synchronisations.
