@@ -5,6 +5,8 @@ Given the lack of a good way to get the real-world time from an OpenComputers ma
 ## OpenOS
 The realtime package for OpenOS includes:
 
-- The [realtime library](OpenOS/usr/man/realtime) itself, for OpenOS
-- [realtime-sync](OpenOS/usr/man/realtime-sync), for synchronising with the real world
-- [realtime-relay](OpenOS/usr/man/realtime-relay), for synchronising with another OpenComputers machine
+- The [realtime library](OpenOS/usr/lib/realtime.lua) itself, for OpenOS
+- [realtime-sync](OpenOS/etc/rc.d/realtime-sync.lua), for synchronising with the real world
+- [realtime-relay](OpenOS/etc/rc.d/realtime-relay.lua), for synchronising with another OpenComputers machine
+
+These can be installed as oppm packages, and documentation can be found [here](OpenOS/usr/man)
