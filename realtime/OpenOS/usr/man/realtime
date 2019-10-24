@@ -1,0 +1,13 @@
+# realtime
+
+realtime is a library for OpenOS providing a reasonably accurate current real-world time, given the right input (see realtime-sync and realtime-relay).
+
+## API
+
+### realtime.time(*utc*)
+
+Returns the current time, either respecting the current offset, or if *utc* is set, with no offset.
+
+### realtime.update(*epoch*, *uptime*, *offset*)
+
+Updates the currently known real time, with the time as *epoch*, measured at *uptime*. Optionally, an offset can be provided.
