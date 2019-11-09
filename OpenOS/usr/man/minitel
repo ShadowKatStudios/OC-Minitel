@@ -71,7 +71,7 @@ The minitel library provides an easy way of interacting with the minitel daemon,
 
 *minitel.usend(host, port, data, pid)* - Sends an unreliable packet to *host* on *port* containing *data*, optionally with the packet ID *pid*.
 
-*minitel.rsend(host, port, data, block)* - Sends a reliable packet to *host* on *port* containing *data*. If *block* is true, don't wait for a reply, instead return the packet ID.
+*minitel.rsend(host, port, data, noblock)* - Sends a reliable packet to *host* on *port* containing *data*. If *noblock* is true, don't wait for an acknowledgement, instead return the packet ID.
 
 #### Layer 4
 
@@ -81,7 +81,9 @@ The minitel library provides an easy way of interacting with the minitel daemon,
 
 *minitel.open(to,port)* - Establishes a stream to *host* on *port* and returns a stream object
 
-*minitel.listen(port)* - Waits for another node to establish a stream, and returns the stream object.
+*minitel.listen(port)* - Waits for another node to establish a stream on *port*, and returns the stream object.
+
+*minitel.flisten(port,callback)* - Spawns an event listener that will wait for another node to establish a stream on *port*, and run the function provided as *callback* with the socket object as its argument..
 
 #### Stream objects
 
