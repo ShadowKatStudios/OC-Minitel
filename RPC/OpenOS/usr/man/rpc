@@ -1,0 +1,19 @@
+# RPC
+Minitel Remote Procedure Call Library
+
+## API
+In all instances, if *hostname* is replaced with *localhost*, an attempt will be made to call the registered procedure on the local machine.
+
+### rpc.call(*hostname*, *name*, ...)
+Call function *name* on remote host *hostname* with arguments ...
+
+### rpc.proxy(*hostname*, *filter*)
+Return a table containing the functions on *hostname* matching *filter*, which is a Lua pattern.
+
+### rpc.register(*name*, *function*)
+Registers *function* as the RPC call for *name* on the current host.
+
+## Variables
+
+### rpc.port = 111
+Port to use for RPC calls and registration.
