@@ -80,7 +80,7 @@ local function createTunnel(host,port,addr,raddr)
   return 8192
  end
  function proxy.getChannel()
-  return proxy.host..":"..tostring(port)
+  return host..":"..tostring(port)
  end
  event.listen("internet_ready",proxy.read)
  listeners[addr] = {"internet_ready",proxy.read}
