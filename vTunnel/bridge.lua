@@ -96,8 +96,10 @@ function pushLoop()
   for id,msg in pairs(messages) do
    if msg[1]:len() > 3 then
     for k,client in pairs(clients) do
-     client.conn:send(msg[1])
-     reprint("Message #"..tostring(id).." (Client #"..tostring(msg[2]).." -> Client #"..tostring(k).." - "..msg[1])
+     if k ~= msg[2] then
+      client.conn:send(msg[1])
+      reprint("Message #"..tostring(id).." (Client #"..tostring(msg[2]).." -> Client #"..tostring(k)..") - "..msg[1])
+     end
     end
    end
    messages[id] = nil
