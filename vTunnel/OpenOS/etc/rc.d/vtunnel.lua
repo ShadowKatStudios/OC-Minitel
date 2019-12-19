@@ -72,6 +72,16 @@ local function createTunnel(host,port,addr,raddr)
    proxy.last = computer.uptime()
   end
  end
+ function proxy.getWakeMessage()
+  return false
+ end
+ proxy.setWakeMessage = proxy.getWakeMessage
+ function proxy.maxPacketSize()
+  return 8192
+ end
+ function proxy.getChannel()
+  return proxy.host..":"..tostring(port)
+ end
  event.listen("internet_ready",proxy.read)
  listeners[addr] = {"internet_ready",proxy.read}
  timers[addr] = event.timer(cfg.rtimer, proxy.read, math.huge)
@@ -113,6 +123,11 @@ function settimer(time)
  savecfg()
 end
 
+function listpeers()
+ for k,v in pairs(cfg.peers) do
+  print(string.format("#%d (%s:%d)\n Local address: %s\n Remote address: %s",k,v.host,v.port,v.addr,v.raddr))
+ end
+end
 function addpeer(host,port)
  port = tonumber(port) or 4096
  local t = {}
@@ -123,12 +138,6 @@ function addpeer(host,port)
  cfg.peers[#cfg.peers+1] = t
  print(string.format("Added peer #%d (%s:%d) to the configuration.\nRestart to apply changes.",#cfg.peers,host,port))
  savecfg()
-end
-
-function listpeers()
- for k,v in pairs(cfg.peers) do
-  print(string.format("#%d (%s:%d)\n Local address: %s\n Remote address: %s",k,v.host,v.port,v.addr,v.raddr))
- end
 end
 function delpeer(n)
  n=tonumber(n)
