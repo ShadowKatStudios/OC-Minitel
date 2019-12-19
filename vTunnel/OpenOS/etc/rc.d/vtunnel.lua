@@ -1,88 +1,142 @@
-local vcomp = require "vcomponent"
+local vcomponent = require "vcomponent"
+local serial = require "serialization"
 local component = require "component"
 local computer = require "computer"
-local imt = require "interminitel"
 local event = require "event"
-local internet = component.internet
+local imt = require "interminitel"
 
-local addr, raddr = vcomp.uuid(),vcomp.uuid()
-local poll = 0.5
-local listener, timer
-local socket
+local cfg = {}
+cfg.peers = {}
+cfg.rtimer = 5
+cfg.katimer = 30
+local listeners = {}
+local timers = {}
+local proxies = {}
 
--- dumb keepalive stuff
-local keepalive = 30
-local katimer
-
-function start(faddr)
- if listener then return end
- if faddr then
-  local host,nport = faddr:match("(.+):(%d+)")
+local function loadcfg()
+ local f = io.open("/etc/vtunnel.cfg","rb")
+ if not f then return false end
+ for k,v in pairs(serial.unserialize(f:read("*a")) or {}) do
+  cfg[k] = v
  end
- local iaddr,port = host or faddr or "shadowkat.net", tonumber(nport) or 4096
- socket = internet.connect(iaddr,port)
- print("Connecting to "..iaddr..":"..tostring(port).."...")
- repeat
-  os.sleep(0.5)
- until socket.finishConnect()
- print("Connected!")
- 
- local proxy = {}
- local rbuffer = ""
- local timer = nil
- 
- function listener(t)
-  rbuffer=rbuffer..(socket.read(4096) or "")
-  if imt.decodePacket(rbuffer) then
-   computer.pushSignal("modem_message",addr,raddr,0,0,imt.decodePacket(rbuffer))
-   rbuffer = imt.getRemainder(rbuffer) or ""
-  end
-  if t == "internet_ready" and timer then
-   event.cancel(timer)
-   timer = nil
-  end
+ f:close()
+end
+local function savecfg()
+ local f = io.open("/etc/vtunnel.cfg","wb")
+ if not f then 
+  print("Warning: unable to save configuration.")
+  return false
  end
- timer = event.timer(poll,listener,math.huge) -- this is only here because OCEmu doesn't do internet_ready
- event.listen("internet_ready",listener)
- 
- -- also dumb keepalive stuff, fix this later
- katimer = event.timer(keepalive,function()
-  socket.write("\0\1\0")
- end,math.huge)
- 
- function proxy.send(...)
-  socket.write(imt.encodePacket(...))
- end
- 
- function proxy.maxPacketSize()
-  return 12288
- end
- 
- proxy.type = "tunnel"
- proxy.slot = 4096
- 
- local docs = {
-  send = "function(data...) -- Sends the specified data to the card this one is linked to.",
-  maxPacketSize = "function():number -- Gets the maximum packet size (config setting)."
- }
- vcomp.register(addr,"tunnel",proxy,docs)
+ f:write(serial.serialize(cfg))
+ f:close()
 end
 
+local function createTunnel(host,port,addr,raddr)
+ local proxy = {address=addr,buffer=""}
+ function proxy.connect()
+  if proxy.socket then
+   proxy.socket.close()
+  end
+  proxy.socket = component.internet.connect(host,port)
+  local st = computer.uptime()
+  repeat
+   coroutine.yield()
+  until proxy.socket.finishConnect() or computer.uptime() > st+5
+ end
+ function proxy.send(...)
+  rt = 0
+  while not proxy.socket.write(imt.encodePacket(...)) and rt < 10 do
+   proxy.connect()
+   rt = rt + 1
+  end
+  proxy.last = computer.uptime()
+ end
+ function proxy.read()
+  local rb, r
+  local rt = 0
+  while true do
+   rb,r = proxy.socket.read(4096)
+   if rb or rt > 10 then break end
+   if type(rb) == "nil" then
+    proxy.connect()
+   end
+   rt = rt + 1
+  end
+  proxy.buffer = proxy.buffer .. rb
+  while imt.decodePacket(proxy.buffer) do
+   computer.pushSignal("modem_message",addr,raddr,0,0,imt.decodePacket(proxy.buffer))
+   proxy.buffer = imt.getRemainder(proxy.buffer) or ""
+  end
+  if computer.uptime() > proxy.last + cfg.katimer then
+   proxy.socket.write("\0\1\0")
+   proxy.last = computer.uptime()
+  end
+ end
+ event.listen("internet_ready",proxy.read)
+ listeners[addr] = {"internet_ready",proxy.read}
+ timers[addr] = event.timer(cfg.rtimer, proxy.read, math.huge)
+ proxy.connect()
+ proxy.last = computer.uptime()
+ return proxy
+end
+
+function start()
+ loadcfg()
+ for k,v in pairs(cfg.peers) do
+  print(string.format("Connecting to %s:%d",v.host,v.port))
+  v.addr = v.addr or vcomponent.uuid()
+  v.raddr = v.raddr or vcomponent.uuid()
+  local px = createTunnel(v.host, v.port, v.addr, v.raddr)
+  vcomponent.register(v.addr, "tunnel", px)
+  proxies[v.addr] = px
+ end
+end
 function stop()
- if listener then
-  event.ignore("internet_ready",listener)
-  listener = nil
+ for k,v in pairs(listeners) do
+  event.ignore(v[1],v[2])
  end
- if timer then
-  event.cancel(timer)
-  timer = nil
+ for k,v in pairs(timers) do
+  event.cancel(v)
  end
- if katimer then
-  event.cancel(katimer)
-  katimer = nil
+ for k,v in pairs(proxies) do
+  vcomponent.unregister(k)
  end
- if component.type(addr) then
-  vcomp.unregister(addr)
+end
+
+function settimer(time)
+ time = tonumber(time)
+ if not time then
+  print("Timer must be a number.")
+  return false
  end
- socket.close()
+ cfg.rtime = time
+ savecfg()
+end
+
+function addpeer(host,port)
+ port = tonumber(port) or 4096
+ local t = {}
+ t.host = host
+ t.port = port
+ t.addr = vcomponent.uuid()
+ t.raddr = vcomponent.uuid()
+ cfg.peers[#cfg.peers+1] = t
+ print(string.format("Added peer #%d (%s:%d) to the configuration.\nRestart to apply changes.",#cfg.peers,host,port))
+ savecfg()
+end
+
+function listpeers()
+ for k,v in pairs(cfg.peers) do
+  print(string.format("#%d (%s:%d)\n Local address: %s\n Remote address: %s",k,v.host,v.port,v.addr,v.raddr))
+ end
+end
+function delpeer(n)
+ n=tonumber(n)
+ if not n then
+  print("delpeer requires a number, representing the peer number, as an argument.")
+  return false
+ end
+ local dp = table.remove(cfg.peers, n)
+ savecfg()
+ print(string.format("Removed peer %s:%d",dp.host, dp.port))
 end

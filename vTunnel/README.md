@@ -8,23 +8,13 @@ The protocol is documented [here](vtunnel-protocol.md)
 
 ## Setup
 
-### Server
-
-#### Requirements
+### Server Requirements
 
 - Some form of unix-like
 - Lua 5.2 or 5.3
 - Luasocket
 
-#### Running the server
-
-At present, all you need to do is run bridge.lua, for example:
-
-```
-lua53 bridge.lua [port] [timeout]
-```
-
-### Client
+### Client Installation
 
 #### OPPM
 
@@ -37,33 +27,46 @@ oppm install vtunnel
 1. Install vtunnel.lua to /etc/rc.d
 2. Install interminitel.lua to /usr/lib
 
-#### Running
+### Client setup
+
+#### Creating a connection
+Many connections can be configured. To add one:
+
+```
+rc vtunnel addpeer <server address> <server port>
+```
+
+## Usage
+
+### Running the server
+
+At present, all you need to do is run bridge.lua, for example:
+
+```
+lua53 bridge.lua [port] [timeout]
+```
+
+### Client
 
 vTunnel is invoked as follows:
 
 ```
-rc vtunnel start <server address>:<server port>
+rc vtunnel start
 ```
 
-This will create a virtual linked card component connected to server\_address:server\_port.
-
-#### Configuration
-
-vTunnel can also be configured to start automatically. First, one would enable the rc service:
+vTunnel can also be configured to start automatically:
 
 ```
 rc vtunnel enable
 ```
 
-Then, edit /etc/rc.cfg and add a line as follows:
+There are several other commands available under `rc vtunnel`:
 
-```
-vtunnel = "server.address:port"
-```
+ - settimer - allows you to configure how often vTunnel polls the TCP socket
+ - listpeers - shows which peers are configured, and the associated tunnel card addresses
+ - delpeer - deletes a peer from the configuration, as shown in listpeers
 
-Leaving it as default will result in vTunnel connecting to the public SKS bridge.
-
-#### Minitel configuration
+### Minitel configuration
 
 1. Disable minitel with rc - `rc minitel disable`
 2. Enable vtunnel with rc - `rc vtunnel enable`

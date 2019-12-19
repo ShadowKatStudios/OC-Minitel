@@ -1,9 +1,10 @@
 local socket = require "socket"
 local imt = require "interminitel"
+local pcap = require "pcap"
 
 local tArgs = {...}
 
-local port, timeout = tonumber(tArgs[1]) or 4096, tonumber(tArgs[2]) or 60
+local port, timeout, pf = tonumber(tArgs[1]) or 4096, tonumber(tArgs[2]) or 60, tArgs[3]
 
 local clients, coroutines, messages = {}, {}, {}
 
@@ -101,6 +102,14 @@ function pushLoop()
       reprint("Message #"..tostring(id).." (Client #"..tostring(msg[2]).." -> Client #"..tostring(k)..") - "..msg[1])
      end
     end
+    if pf then
+     local f=io.open(pf,"ab")
+     if f then
+      f:write(pcap.packet(msg[1]))
+      print(pcap.packet(msg[1]))
+      f:close()
+     end
+    end
    end
    messages[id] = nil
   end
@@ -125,6 +134,16 @@ function bufferLoop()
 end
 
 spawn(bufferLoop)
+
+if pf then
+ local f=io.open(pf,"wb")
+ if f then
+  f:write(pcap.header())
+  f:close()
+ else
+  pf=nil
+ end
+end
 
 while #coroutines > 0 do
  for k,v in pairs(coroutines) do
