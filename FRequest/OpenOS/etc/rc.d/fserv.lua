@@ -3,6 +3,8 @@ local syslog = require "syslog"
 local fs = require "filesystem"
 local event = require "event"
 local serial = require "serialization"
+local thread = require "thread"
+local internet = require "internet"
 
 local coro = {} -- table of coroutines, one per socket
 local cfg = {}
@@ -12,6 +14,7 @@ local isRunning = false -- simple lock
 cfg.path = "/srv" -- default config
 cfg.port = 70
 cfg.looptimer = 0.5
+cfg.iproxy = false
 
 local function log(msg,level)
  syslog(msg,level,"frequestd")
@@ -39,7 +42,7 @@ local function writeConfig()
 end
 
 local function handleSocket(sock) -- create a coroutine for a new socket
- coro[#coro+1] = coroutine.create(function()
+ coro[#coro+1] = thread.create(function()
   local line
   repeat
    coroutine.yield()
@@ -51,8 +54,26 @@ local function handleSocket(sock) -- create a coroutine for a new socket
    sock:close()
    return false
   end
-  path = fs.canonical(cfg.path.."/"..fs.canonical(path))
   sock.cname = sock.addr..":"..tostring(sock.port)
+  if path:match("^/?(http[s]?)/") and cfg.iproxy then
+   local scheme, rpath = path:match("^/?(http[s]?)/(.+)")
+   log("["..sock.cname.."] "..scheme.."://"..rpath,6)
+   local r = internet.request(scheme.."://"..rpath)
+   if r then
+    log("["..sock.cname.."] Transferring remote file.",7)
+    sock:write("y")
+    for s in r do
+     coroutine.yield()
+     sock:write(s)
+    end
+   else
+    log("["..sock.cname.."] Unable to open remote file.",7)
+    sock:write("fUnable to open remote file.")
+   end
+   sock:close()
+   return
+  end
+  path = fs.canonical(cfg.path.."/"..fs.canonical(path))
   log("["..sock.cname.."] "..ttype.." "..path,6)
   if ttype == "t" then -- transfer request
    if not fs.exists(path) then
@@ -81,8 +102,8 @@ local function handleSocket(sock) -- create a coroutine for a new socket
    log("["..sock.cname.."] Transferring file.",7)
    local chunk = f:read(net.mtu)
    repeat
-    sock:write(chunk)
     coroutine.yield()
+    sock:write(chunk)
     chunk = f:read(net.mtu)
    until not chunk
    sock:close()
@@ -107,30 +128,15 @@ local function handleSocket(sock) -- create a coroutine for a new socket
  log("New connection: "..sock.addr..":"..tostring(sock.port),7)
 end
 
-local function sched() -- run coroutines
- if isRunning then return end
- isRunning = true
- for i = #coro, 1, -1 do -- prune dead coroutines
-  if coroutine.status(coro[i]) == "dead" then
-   table.remove(coro,i)
-  end
- end
- for k,v in pairs(coro) do
-  coroutine.resume(v)
- end
- isRunning = false
-end
-
 function start()
  if timer or listener then return end
  loadConfig()
  writeConfig()
- timer = event.timer(cfg.looptimer, sched, math.huge)
  listener = net.flisten(cfg.port, handleSocket)
 end
 function stop()
  if not timer or not listener then return end
- event.cancel(timer)
+ thread.waitForAll(coro)
  event.ignore("net_msg",listener)
 end
 function restart()
