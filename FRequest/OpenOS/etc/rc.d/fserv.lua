@@ -63,7 +63,7 @@ local function handleSocket(sock) -- create a coroutine for a new socket
     log("["..sock.cname.."] Transferring remote file.",7)
     sock:write("y")
     for s in r do
-     coroutine.yield()
+     os.sleep(0)
      sock:write(s)
     end
    else
@@ -102,8 +102,8 @@ local function handleSocket(sock) -- create a coroutine for a new socket
    log("["..sock.cname.."] Transferring file.",7)
    local chunk = f:read(net.mtu)
    repeat
-    coroutine.yield()
-    sock:write(chunk)
+    os.sleep(0)
+    sock:write(chunk or "")
     chunk = f:read(net.mtu)
    until not chunk
    sock:close()
