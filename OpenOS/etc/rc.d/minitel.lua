@@ -26,7 +26,7 @@ local modems = {}
 cfg.debug = false
 cfg.port = 4096
 cfg.retry = 10
-cfg.retrycount = 64
+cfg.retrycount = 3
 cfg.route = true
 
 --[[
