@@ -112,7 +112,7 @@ function net.open(to,port)
  local st = computer.uptime()+net.streamdelay
  local est = false
  while true do
-  _,from,rport,data = event.pull("net_msg")
+  _,from,rport,data = event.pull(net.streamdelay, "net_msg")
   if to == from and rport == port then
    if tonumber(data) then
     est = true
