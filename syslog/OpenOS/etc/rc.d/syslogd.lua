@@ -71,9 +71,15 @@ end
 local function remote_listener(_,from,port,data)
  if port ~= cfg.port then return false end
  local service, level, msg = data:match("(.-)\t(%d)\t(.+)")
- if not service and not level and not msg then return false end
+ if not service or not level or not msg then return false end
  msg, level, service = tostring(msg),tonumber(level),tostring(service)
  wentry(nil,msg,level,service,from)
+end
+
+local function local_listener(_,msg,level,service)
+ if not service or not level or not msg then return false end
+ msg, level, service = tostring(msg),tonumber(level),tostring(service)
+ wentry(nil,msg,level,service,hostname)
 end
 
 function start()
