@@ -36,36 +36,25 @@ if px.dirstat then -- use single call for file info
   return rt
  end
  local oid, osize, olm = px.isDirectory, px.size, px.lastModified
- local function cc() -- clean the cache of old entries
+ local function gce(p,n)
   for k,v in pairs(statcache) do
    if computer.uptime() > v[1] + 1 then
     statcache[k] = nil
    end
   end
+  local ci = statcache["/"..fs.canonical(p)]
+  if ci then
+   return ci[3]
+  end
  end
  function px.isDirectory(path)
-  cc()
-  local ci = statcache["/"..fs.canonical(path)]
-  if ci then
-   return ci[3]
-  end
-  return oid(path)
+  return gce(path, 2) or oid(path)
  end
  function px.size(path)
-  cc()
-  local ci = statcache["/"..fs.canonical(path)]
-  if ci then
-   return ci[2]
-  end
-  return osize(path)
+  return gce(path, 3) or osize(path)
  end
  function px.lastModified(path)
-  cc()
-  local ci = statcache["/"..fs.canonical(path)]
-  if ci then
-   return ci[3]
-  end
-  return olm(path)
+  return gce(path, 4) or olm(path)
  end
 end
 fs.mount(px, lpath)
