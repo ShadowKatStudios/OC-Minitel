@@ -74,6 +74,17 @@ function fsproxy.new(path,wp) -- string boolean -- table -- Returns a proxy obje
  function proxy.size(path)
   return fs.size(cpath..sanitisePath(path))
  end
+
+ function proxy.dirstat(path) -- bundle the metadata about files into the listing to reduce round trips
+  local rt = {}
+  local dp = cpath..sanitisePath(path).."/"
+  local iter, err = fs.list(dp)
+  if not iter then return nil, err end
+  for name in iter do
+   rt[name] = {fs.isDirectory(dp..name), fs.size(dp..name), fs.lastModified(dp..name)}
+  end
+  return rt
+ end
  
  function proxy.open(path,mode)
   if wp and mode:find("[wa]") then return false, "read-only filesystem" end
