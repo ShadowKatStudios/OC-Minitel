@@ -44,7 +44,7 @@ if px.dirstat then -- use single call for file info
   end
   local ci = statcache["/"..fs.canonical(p)]
   if ci then
-   return ci[3]
+   return ci[n]
   end
  end
  function px.isDirectory(path)
@@ -56,5 +56,9 @@ if px.dirstat then -- use single call for file info
  function px.lastModified(path)
   return gce(path, 4) or olm(path)
  end
+end
+local iro = px.isReadOnly()
+function px.isReadOnly()
+ return iro
 end
 fs.mount(px, lpath)
