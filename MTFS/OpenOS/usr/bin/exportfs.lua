@@ -1,17 +1,16 @@
 local fsproxy = require "fsproxy"
-local rpc = require "rpc"
 local fs = require "filesystem"
+local shell = require "shell"
+local rpc = require "rpc"
 
-local tA = {...}
+local tA, tO = shell.parse(...)
 if #tA < 1 then
- print("Usage: exportfs <directory> [directory] ...")
+ print("Usage: exportfs <directory> [--rw] [--name=<name>]")
  return
 end
-
-for k,v in pairs(tA) do
- local px = fsproxy.new(v)
- for l,m in pairs(px) do
-  rpc.register("fs_"..v.."_"..l,m)
- end
- print(v)
+local px = fsproxy.new(tA[1], not tO.rw)
+local name = tO.name or tA[1]
+for l,m in pairs(px) do
+ rpc.register("fs_"..name.."_"..l,m)
 end
+print(string.format("%s (%s)", name, (tO.rw and "rw") or "ro"))

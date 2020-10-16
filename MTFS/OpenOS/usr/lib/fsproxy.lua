@@ -30,7 +30,7 @@ function fsproxy.new(path,wp) -- string boolean -- table -- Returns a proxy obje
  end
  local handles = {}
  function proxy.isReadOnly()
-  return originalProxy.isReadOnly()
+  return wp or originalProxy.isReadOnly()
  end
  function proxy.getLabel()
   return originalProxy.getLabel()
