@@ -5,12 +5,13 @@ local rpc = require "rpc"
 
 local tA, tO = shell.parse(...)
 if #tA < 1 then
- print("Usage: exportfs <directory> [--rw] [--name=<name>]")
+ print("Usage: exportfs <directory> [-d] [--rw] [--name=<name>]")
  return
 end
 local px = fsproxy.new(tA[1], not tO.rw)
 local name = tO.name or tA[1]
 for l,m in pairs(px) do
+ m = not tO.d and m or nil
  rpc.register("fs_"..name.."_"..l,m)
 end
 print(string.format("%s (%s)", name, (tO.rw and "rw") or "ro"))
