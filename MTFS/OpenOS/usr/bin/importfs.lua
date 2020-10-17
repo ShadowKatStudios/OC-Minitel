@@ -57,7 +57,10 @@ if px.dirstat then -- use single call for file info
   return gce(path, 4) or olm(path)
  end
 end
-local iro = px.isReadOnly()
+local iro,e = px.isReadOnly()
+if not iro then
+ error(e)
+end
 function px.isReadOnly()
  return iro
 end
