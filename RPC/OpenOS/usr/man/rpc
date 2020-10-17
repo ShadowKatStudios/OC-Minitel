@@ -1,5 +1,5 @@
 # RPC
-Minitel Remote Procedure Call Library
+Minitel Remote Procedure Call Library for OpenOS
 
 ## API
 In all instances, if *hostname* is replaced with *localhost*, an attempt will be made to call the registered procedure on the local machine.
@@ -13,7 +13,23 @@ Return a table containing the functions on *hostname* matching *filter*, which i
 ### rpc.register(*name*, *function*)
 Registers *function* as the RPC call for *name* on the current host.
 
+### rpc.allow(*fname*, *hostname*)
+Adds *hostname* to the list of remote hosts allowed to execute the function *fname*.
+
+## Access control
+Access control is implemented by way of an "allow" list and a "deny" list. Any function lacking both lists will default to the function being available to all hosts.
+
+Any entries in the 'allow' list for a function will disable access for any but those in the allow list.
+
+Entries in the 'deny' list will result in the hosts in said list being denied, but other hosts are allowed. This will not override the 'allow' list.
+
 ## Variables
 
 ### rpc.port = 111
 Port to use for RPC calls and registration.
+
+### rpc.allow = {}
+Table containing the allow lists of exported functions. Contents subject to change.
+
+### rpc.deny = {}
+Table containing the deny lists of exported functions. Contents subject to change.

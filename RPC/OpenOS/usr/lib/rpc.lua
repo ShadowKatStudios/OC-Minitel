@@ -6,6 +6,7 @@ local rpcf = {}
 local rpcrunning = false
 local rpc = {}
 rpc.port = 111
+
 function rpc.call(hostname,fn,...)
  if hostname == "localhost" then
   return rpcf[fn](...)
@@ -39,19 +40,37 @@ function rpc.proxy(hostname,filter)
  return rt
 end
 
+local function setacl(self, fname, host)
+ self[fname] = self[fname] or {}
+ self[fname][host] = true
+end
+rpc.allow = setmetatable({},{__call=setacl})
+rpc.deny = setmetatable({},{__call=setacl})
+
+local function isPermitted(host,fn)
+ if rpc.allow[fn] then
+  return rpc.allow[fn][host] or false
+ end
+ if rpc.deny[fn] and rpc.deny[fn][host] then
+  return false
+ end
+ return true
+end
+
 function rpc.register(name,fn)
  if not rpcrunning then
   event.listen("net_msg",function(_, from, port, data)
    if port == rpc.port then
     local rpcrq = serial.unserialize(data)
     local rpcn, rpcid = table.remove(rpcrq,1), table.remove(rpcrq,1)
-    if rpcf[rpcn] then
+    if rpcf[rpcn] and isPermitted(from,rpcn) then
      local rt = {pcall(rpcf[rpcn],table.unpack(rpcrq))}
      if rt[1] == true then
       table.remove(rt,1)
      end
      minitel.send(from,port,serial.serialize({rpcid,table.unpack(rt)}))
     else
+     minitel.send(from,port,serial.serialize({rpcid,false,"function unavailable"}))
     end
    end
   end)
@@ -66,6 +85,5 @@ function rpc.register(name,fn)
  end
  rpcf[name] = fn
 end
-
 
 return rpc
