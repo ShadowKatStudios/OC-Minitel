@@ -85,7 +85,7 @@ end
 function start()
  reload()
  if #listeners > 0 then return end
- event.listen("syslog",wentry)
+ event.listen("syslog",local_listener)
  listeners[#listeners+1] = {"syslog",local_listener}
  if havenet and cfg.receive then
   event.listen("net_msg",remote_listener)
