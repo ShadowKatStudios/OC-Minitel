@@ -3,7 +3,7 @@ local serial = require "serialization"
 local computer = require "computer"
 local havenet, net = pcall(require,"minitel")
 
-local hostname = os.getenv("HOSTNAME") or computer.address:sub(1,8)
+local hostname = os.getenv("HOSTNAME") or computer.address():sub(1,8)
 local cfg = {}
 cfg.port = 514
 cfg.relay = false
@@ -41,7 +41,7 @@ function reload()
    f:close()
   end
  end
- hostname = os.getenv("HOSTNAME") or computer.address:sub(1,8)
+ hostname = os.getenv("HOSTNAME") or computer.address():sub(1,8)
 end
 
 local function wentry(_,msg,level,service,host)
