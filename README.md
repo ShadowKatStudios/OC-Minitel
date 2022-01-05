@@ -40,4 +40,4 @@ This repository also contains a number of implementations and specifications for
 ## Development and discussion
 Code and documentation is hosted in the [Github repository](https://github.com/XeonSquared/OC-Minitel).
 
-Discussion takes place in, among other places, the [#SKS IRC channel on EsperNet](irc://irc.esper.net/#SKS) ([webchat](https://webchat.esper.net/?channels=SKS))
+Discussion takes place in, among other places, the [#SKSDev IRC channel on EsperNet](irc://irc.esper.net/#SKSDev) (alternatively, via [webchat](https://webchat.esper.net/?channels=SKSDev) or [XMPP](xmpp:#SKSDev%irc.esper.net@irc.jabberfr.org?join))
