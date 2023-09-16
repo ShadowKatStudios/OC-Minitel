@@ -62,6 +62,9 @@ function rpc.register(name,fn)
   event.listen("net_msg",function(_, from, port, data)
    if port == rpc.port then
     local rpcrq = serial.unserialize(data)
+    if #rpcrq ~= 3 then
+     return
+    end
     local rpcn, rpcid = table.remove(rpcrq,1), table.remove(rpcrq,1)
     if rpcf[rpcn] and isPermitted(from,rpcn) then
      local rt = {pcall(rpcf[rpcn],table.unpack(rpcrq))}
