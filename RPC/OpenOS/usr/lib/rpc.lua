@@ -11,7 +11,7 @@ function rpc.call(hostname,fn,...)
  if hostname == "localhost" then
   return rpcf[fn](...)
  end
- local rv = minitel.genPacketID()
+ local rv = "42return!" .. minitel.genPacketID()
  minitel.rsend(hostname,rpc.port,serial.serialize({fn,rv,...}),true)
  local st = computer.uptime()
  local rt = {}
@@ -58,35 +58,36 @@ local function isPermitted(host,fn)
 end
 
 function rpc.register(name,fn)
- if not rpcrunning then
-  event.listen("net_msg",function(_, from, port, data)
-   if port == rpc.port then
-    local rpcrq = serial.unserialize(data)
-    if #rpcrq ~= 3 then
-     return
-    end
-    local rpcn, rpcid = table.remove(rpcrq,1), table.remove(rpcrq,1)
-    if rpcf[rpcn] and isPermitted(from,rpcn) then
-     local rt = {pcall(rpcf[rpcn],table.unpack(rpcrq))}
-     if rt[1] == true then
-      table.remove(rt,1)
+    if not rpcrunning then
+     event.listen("net_msg",function(_, from, port, data)
+      if port == rpc.port then
+       local rpcrq = serial.unserialize(data)
+       if string.sub(rpcrq[1],1,2) == "42" then
+        return
+       end
+       local rpcn, rpcid = table.remove(rpcrq,1), table.remove(rpcrq,1)
+       if rpcf[rpcn] and isPermitted(from,rpcn) then
+        local rt = {pcall(rpcf[rpcn],table.unpack(rpcrq))}
+        if rt[1] == true then
+         table.remove(rt,1)
+        end
+        minitel.send(from,port,serial.serialize({rpcid,table.unpack(rt)}))
+       else
+        minitel.send(from,port,serial.serialize({rpcid,false,"function unavailable"}))
+       end
+      end
+     end)
+     function rpcf.list()
+      local rt = {}
+      for k,v in pairs(rpcf) do
+       rt[#rt+1] = k
+      end
+      return rt
      end
-     minitel.send(from,port,serial.serialize({rpcid,table.unpack(rt)}))
-    else
-     minitel.send(from,port,serial.serialize({rpcid,false,"function unavailable"}))
+     rpcrunning = true
     end
+    rpcf[name] = fn
    end
-  end)
-  function rpcf.list()
-   local rt = {}
-   for k,v in pairs(rpcf) do
-    rt[#rt+1] = k
-   end
-   return rt
-  end
-  rpcrunning = true
- end
- rpcf[name] = fn
-end
-
-return rpc
+   
+   return rpc
+   
