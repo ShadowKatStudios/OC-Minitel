@@ -31,5 +31,6 @@ for k,v in cm do
     error("no such remote component: "..addr)
     end
     vcomponent.register(faddr or addr, ctype, px)
+    os.sleep(2)
 end
 
