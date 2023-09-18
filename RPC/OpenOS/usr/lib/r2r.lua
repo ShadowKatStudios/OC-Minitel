@@ -1,6 +1,6 @@
 r2r = {}
 r2r.buffer = {}
-r2r.chunksize = 4000
+r2r.chunksize = 1000
 r2r.initalized = false
 r2r.fn = {}
 

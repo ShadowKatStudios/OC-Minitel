@@ -8,11 +8,11 @@ if #tA < 1 then
  return
 end
 
-local components = r2r.call(host,"listcomponents")
+local cm = r2r.call(host,"listcomponents")
 
-for k,v in pairs(components) do
-    ctype = k
-    addr = v
+for k,v in cm do
+    ctype = v
+    addr = k
     local saddr = addr:gsub("%-","%%-")
     if addr:len() < 36 then
     local flist = r2r.call(host,"list")
@@ -31,6 +31,5 @@ for k,v in pairs(components) do
     error("no such remote component: "..addr)
     end
     vcomponent.register(faddr or addr, ctype, px)
-
 end
 
