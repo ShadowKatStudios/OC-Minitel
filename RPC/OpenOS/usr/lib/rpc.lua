@@ -19,10 +19,13 @@ function rpc.call(hostname,fn,...)
   local _, from, port, data = event.pull(30, "net_msg", hostname, rpc.port)
   rt = serial.unserialize(data) or {}
  until rt[1] == rv or computer.uptime() > st + 30
- if table.remove(rt,1) == rv then
-  return table.unpack(rt)
+ if rt[1] == rv then
+  if rt[2] then
+   return table.unpack(rt,3)
+  end
+  error(rt[3])
  end
- return false
+ error("timed out")
 end
 function rpc.proxy(hostname,filter)
  filter=(filter or "").."(.+)"
@@ -62,15 +65,11 @@ function rpc.register(name,fn)
   event.listen("net_msg",function(_, from, port, data)
    if port == rpc.port then
     local rpcrq = serial.unserialize(data)
-    local rpcn, rpcid = table.remove(rpcrq,1), table.remove(rpcrq,1)
-    if rpcf[rpcn] and isPermitted(from,rpcn) then
-     local rt = {pcall(rpcf[rpcn],table.unpack(rpcrq))}
-     if rt[1] == true then
-      table.remove(rt,1)
-     end
-     minitel.send(from,port,serial.serialize({rpcid,table.unpack(rt)}))
-    else
-     minitel.send(from,port,serial.serialize({rpcid,false,"function unavailable"}))
+    if rpcf[rpcrq[1]] and isPermitted(from,rpcrq[1]) then
+     local rt = {pcall(rpcf[rpcrq[1]],table.unpack(rpcrq))}
+     minitel.send(from,port,serial.serialize({rpcrq[2],pcall(rpcf[rpcrq[1]],table.unpack(rpcrq,3))}))
+    elseif type(rpcrq[2]) == "string" then
+     minitel.send(from,port,serial.serialize({rpcrq[2],false,"function unavailable"}))
     end
    end
   end)
