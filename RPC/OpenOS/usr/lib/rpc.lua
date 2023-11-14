@@ -85,4 +85,10 @@ function rpc.register(name,fn)
  rpcf[name] = fn
 end
 
+function rpc.unregister(name)
+ rpcf[name] = nil
+ rpc.allow[name] = nil
+ rpc.deny[name] = nil
+end
+
 return rpc
