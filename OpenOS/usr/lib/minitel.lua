@@ -1,11 +1,17 @@
 local computer = require "computer"
 local event = require "event"
 local net = {}
-net.mtu = 4096
+net.mtu = 8192
 net.streamdelay = 30
 net.minport = 32768
 net.maxport = 65535
 net.openports = {}
+
+for k,v in pairs(computer.getDeviceInfo()) do
+ if v.class == "network" then
+  net.mtu = math.min(net.mtu, tonumber(v.capacity))
+ end
+end
 
 function net.genPacketID()
  local npID = ""
@@ -31,17 +37,13 @@ function net.rsend(to,port,data,block)
 end
 
 -- ordered packet delivery, layer 4?
-
 function net.send(to,port,ldata)
- local tdata = {}
- if ldata:len() > net.mtu then
-  for i = 1, ldata:len(), net.mtu do
-   tdata[#tdata+1] = ldata:sub(1,net.mtu)
-   ldata = ldata:sub(net.mtu+1)
-  end
- else
-  tdata = {ldata}
+ local tdata, hsize = {}, 44 + #(os.getenv("HOSTNAME") or computer.address():sub(1,8)) + #to
+ while hsize+#ldata > net.mtu do
+  tdata[#tdata+1] = ldata:sub(1, net.mtu - hsize)
+  ldata = ldata:sub(#tdata[#tdata]+1)
  end
+ tdata[#tdata+1] = ldata
  for k,v in ipairs(tdata) do
   if not net.rsend(to,port,v) then return false end
  end
