@@ -74,6 +74,17 @@ function computer.pullSignal(t)
    else
     packetQueue[eventTab[11]] = nil
    end
+  elseif eventTab[8]:sub(1,1) == "~" then
+   if eventTab[8] == "~" then
+    computer.pushSignal("net_broadcast", eventTab[9], eventTab[10], eventTab[11])
+   else
+    for d in eventTab[8]:gmatch("~([^~]+)") do
+     if d == net.hostname then
+      computer.pushSignal("net_msg",eventTab[9],eventTab[10],eventTab[11])
+      break
+     end
+    end
+   end
   elseif net.route and checkCache(eventTab[6]) then
    rawSendPacket(eventTab[6],eventTab[7],eventTab[8],eventTab[9],eventTab[10],eventTab[11])
   end
