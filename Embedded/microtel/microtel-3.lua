@@ -34,7 +34,9 @@ end
 
 function net.send(to,vport,data,packetType,packetID)
  packetType,packetID = packetType or 1, packetID or genPacketID()
- packetQueue[packetID] = {packetType,to,vport,data,0}
+ if packetType == 1 then
+  packetQueue[packetID] = {packetType,to,vport,data,0}
+ end
  sendPacket(packetID,packetType,to,vport,data)
 end
 
