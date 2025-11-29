@@ -41,6 +41,9 @@ sed -i -e 's/sclose/S/g' microtel-5-core-mini.lua
 sed -i -e 's/port/P/g' microtel-5-core-mini.lua
 sed -i -e 's/conn.state/conn.s/g' microtel-5-core-mini.lua
 sed -i -e 's/conn.buffer/conn.b/g' microtel-5-core-mini.lua
+sed -i -e 's/self.state/self.s/g' microtel-5-core-mini.lua
+sed -i -e 's/self.buffer/self.b/g' microtel-5-core-mini.lua
+sed -i -e 's/self/s/g' microtel-5-core-mini.lua
 sed -i -e 's/conn/C/g' microtel-5-core-mini.lua
 sed -i -e 's/etype/E/g' microtel-5-core-mini.lua
 sed -i -e 's/from/F/g' microtel-5-core-mini.lua
