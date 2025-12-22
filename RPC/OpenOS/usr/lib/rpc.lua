@@ -86,9 +86,9 @@ function rpc.register(name,fn)
     local rpcrq = serial.unserialize(data)
     if rpcf[rpcrq[1]] and isPermitted(from,rpcrq[1]) then
      os.setenv("RPC_CLIENT", from)
-     minitel.send(from,port,serial.serialize({rpcrq[2],pcall(rpcf[rpcrq[1]],table.unpack(rpcrq,3))}),true)
+     minitel.rsend(from,port,serial.serialize({rpcrq[2],pcall(rpcf[rpcrq[1]],table.unpack(rpcrq,3))}),true)
     elseif type(rpcrq[2]) == "string" then
-     minitel.send(from,port,serial.serialize({rpcrq[2],false,"function unavailable"}),true)
+     minitel.rsend(from,port,serial.serialize({rpcrq[2],false,"function unavailable"}),true)
     end
    end
   end)
