@@ -16,8 +16,8 @@ function rpc.call(hostname,fn,...)
  local st = computer.uptime()
  local rt = {}
  repeat
-  local _, from, port, data = event.pull(30, "net_msg", hostname, rpc.port)
-  rt = serial.unserialize(data) or {}
+  local _, from, port, data = event.pull((st + 30) - computer.uptime(), "net_msg", hostname, rpc.port)
+  rt = serial.unserialize(data or "") or {}
  until rt[1] == rv or computer.uptime() > st + 30
  if rt[1] == rv then
   if rt[2] then
@@ -27,6 +27,25 @@ function rpc.call(hostname,fn,...)
  end
  error("timed out")
 end
+
+function rpc.callAsync(callback, hostname, fn, ...)
+ local tA, rv, st, timerID = {...}, minitel.genPacketID(), computer.uptime()
+ local handlerID = event.listen("net_msg", function(_, from, port, data)
+  rt = serial.unserialize(data or "") or {}
+  if rt[1] ~= rv then return true end
+  event.cancel(timerID)
+  pcall(callback, table.unpack(rt,2))
+  return false
+ end)
+ timerID = event.timer(30, function()
+  event.ignore("net_msg", handlerID)
+  computer.pushSignal("rpc_timeout", rv)
+  pcall(callback, false, "timed out")
+ end)
+ minitel.rsend(hostname, rpc.port, serial.serialize({fn, rv, table.unpack(tA)}), true)
+ return rv, st
+end
+
 function rpc.proxy(hostname,filter)
  filter=(filter or "").."(.+)"
  local fnames = rpc.call(hostname,"list")
@@ -67,9 +86,9 @@ function rpc.register(name,fn)
     local rpcrq = serial.unserialize(data)
     if rpcf[rpcrq[1]] and isPermitted(from,rpcrq[1]) then
      os.setenv("RPC_CLIENT", from)
-     minitel.send(from,port,serial.serialize({rpcrq[2],pcall(rpcf[rpcrq[1]],table.unpack(rpcrq,3))}))
+     minitel.send(from,port,serial.serialize({rpcrq[2],pcall(rpcf[rpcrq[1]],table.unpack(rpcrq,3))}),true)
     elseif type(rpcrq[2]) == "string" then
-     minitel.send(from,port,serial.serialize({rpcrq[2],false,"function unavailable"}))
+     minitel.send(from,port,serial.serialize({rpcrq[2],false,"function unavailable"}),true)
     end
    end
   end)
