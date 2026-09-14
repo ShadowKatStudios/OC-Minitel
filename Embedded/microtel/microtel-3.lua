@@ -2,7 +2,7 @@ _G.net={}
 
 do
 local modems,packetQueue,packetCache,routeCache,C,Y = {},{},{},{},COMPUTER,UNPACK
-net.port,net.hostname,net.route,net.hook,U=4096,computer.address():sub(1,8),true,{},UPTIME
+net.port,net.hostname,net.route,net.retries,net.hook,U=4096,computer.address():sub(1,8),true,3,{},UPTIME
 
 for a in component.list("modem") do
  modems[a] = component.proxy(a)
@@ -34,7 +34,7 @@ end
 
 function net.send(to,vport,data,packetType,packetID)
  packetType,packetID = packetType or 1, packetID or genPacketID()
- packetQueue[packetID] = {packetType,to,vport,data,0}
+ packetQueue[packetID] = packetType == 1 and {packetType,to,vport,data,computer.uptime(),1}
  sendPacket(packetID,packetType,to,vport,data)
 end
 
@@ -82,7 +82,8 @@ function computer.pullSignal(t)
  for k,v in pairs(packetQueue) do
   if computer.uptime() > v[5] then
    sendPacket(k,table.unpack(v))
-   v[5]=computer.uptime()+30
+   v[5], v[6]=computer.uptime()+30, v[6]+1
+   packetQueue[k] = v[6] < net.retries and packetQueue[k] or nil
   end
  end
  return table.unpack(eventTab)
