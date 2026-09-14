@@ -1,0 +1,4 @@
+[submodule "Embedded/mtpreproc"]
+	path = Embedded/mtpreproc
+	url = https://git.shadowkat.net/izzy/mtpreproc.git
+	branch = main
