@@ -22,12 +22,14 @@ local serial = require "serialization"
 
 local hostname = computer.address():sub(1,8)
 local modems = {}
+local privateModems = {}
 
 cfg.debug = false
 cfg.port = 4096
 cfg.retry = 10
 cfg.retrycount = 3
 cfg.route = true
+cfg.private = {}
 
 --[[
 LKR format:
@@ -64,6 +66,37 @@ local function dprint(...)
  end
 end
 
+local function completeModem(prefix)
+ local candidates = {}
+ local prefixLen = #prefix
+ if prefixLen == 36 then
+  -- explicit UUID is provided, do not check whether it is currently present
+  return {prefix}
+ end
+ for _,modem in ipairs(modems) do
+  local laddr = modem.address
+  if laddr:sub(1,prefixLen) == prefix then
+   candidates[#candidates+1] = laddr
+  end
+ end
+ return candidates
+end
+
+local function completeModemSingle(prefix)
+ local candidates = completeModem(prefix)
+ if #candidates == 1 then
+  return candidates[1]
+ elseif #candidates < 1 then
+  print("No matching modems")
+ else
+  print("Candidate modems:")
+  for _,laddr in ipairs(candidates) do
+   print(laddr)
+  end
+ end
+ return nil
+end
+
 local function saveconfig()
  local f = io.open("/etc/minitel.cfg","wb")
  if f then
@@ -77,7 +110,22 @@ local function loadconfig()
   local newcfg = serial.unserialize(f:read("*a"))
   f:close()
   for k,v in pairs(newcfg) do
-   cfg[k] = v
+   if k == "sroutes" then
+    for to in pairs(cfg.sroutes) do
+     cfg.sroutes[to] = nil
+    end
+    for to,route in pairs(v) do
+     cfg.sroutes[to] = route
+    end
+   else
+    cfg[k] = v
+   end
+  end
+  for k in pairs(privateModems) do
+   privateModems[k] = nil
+  end
+  for _,laddr in ipairs(cfg.private) do
+   privateModems[laddr] = true
   end
  else
   saveconfig()
@@ -114,9 +162,23 @@ function start()
   end
   return npID
  end
+
+ local function canUseModemFor(remoteHost,modemUUID)
+  if not privateModems[modemUUID] then
+   return true
+  end
+  if not cfg.sroutes[remoteHost] then
+   return false
+  end
+  return cfg.sroutes[remoteHost][1] == modemUUID
+ end
  
  local function sendPacket(packetID,packetType,dest,sender,vPort,data,repeatingFrom)
   if rcache[dest] then
+   if rcache[dest][1] == repeatingFrom and packetType ~= 2 then
+    dprint("Cached", rcache[dest][1], "send", "Packet came in on the same interface we use to send, not forwarding")
+    return
+   end
    dprint("Cached", rcache[dest][1],"send",rcache[dest][2],cfg.port,packetID,packetType,dest,sender,vPort,data)
    if component.type(rcache[dest][1]) == "modem" then
     component.invoke(rcache[dest][1],"send",rcache[dest][2],cfg.port,packetID,packetType,dest,sender,vPort,data)
@@ -128,7 +190,7 @@ function start()
    for k,v in pairs(modems) do
     -- do not send message back to the wired or linked modem it came from
     -- the check for tunnels is for short circuiting `v.isWireless()`, which does not exist for tunnels
-    if v.address ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless()) then
+    if (v.address ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless())) and canUseModemFor(dest,v.address) then
      if v.type == "modem" then
       v.broadcast(cfg.port,packetID,packetType,dest,sender,vPort,data)
      elseif v.type == "tunnel" then
@@ -168,7 +230,12 @@ function start()
   pruneCache()
   if pport == cfg.port or pport == 0 then -- for linked cards
    dprint(cfg.port,vPort,packetType,dest)
+   if not canUseModemFor(sender,localModem) then return end
    if checkPCache(packetID) then return end
+   -- update the route cache on every packet received, not just the first time we've seen it since expiring the cache.
+   -- also moved it to before the ack-packets are sent out, which should help them to not flood the network with acks
+   dprint("rcache: "..sender..":", localModem,from,computer.uptime())
+   rcache[sender] = {localModem,from,computer.uptime()+cfg.rctime} 
    if dest == hostname then
     if packetType == 1 then
      sendPacket(genPacketID(),2,sender,hostname,vPort,packetID)
@@ -185,10 +252,6 @@ function start()
     computer.pushSignal("net_broadcast",sender,vPort,data)
    elseif cfg.route then -- repeat packets if route is enabled
     sendPacket(packetID,packetType,dest,sender,vPort,data,localModem)
-   end
-   if not rcache[sender] then -- add the sender to the rcache
-    dprint("rcache: "..sender..":", localModem,from,computer.uptime())
-    rcache[sender] = {localModem,from,computer.uptime()+cfg.rctime}
    end
    if not pcache[packetID] then -- add the packet ID to the pcache
     pcache[packetID] = computer.uptime()+cfg.pctime
@@ -267,10 +330,54 @@ function set(k,v)
 end
 
 function set_route(to,laddr,raddr)
+ laddr = completeModemSingle(laddr)
+ if not laddr then return end
  cfg.sroutes[to] = {laddr,raddr,0}
  saveconfig()
 end
 function del_route(to)
  cfg.sroutes[to] = nil
  saveconfig()
+end
+function route()
+ for k,v in pairs(rcache) do
+  print(k,serial.serialize(v))
+ end
+end
+function persist_route(to)
+ local entry = rcache[to]
+ if not entry then
+  print("No cached route to "..tostring(to))
+  return
+ end
+ set_route(to,entry[1],entry[2])
+end
+function private(laddr)
+ laddr = completeModemSingle(laddr)
+ if not laddr then return end
+ if privateModems[laddr] then
+  print("Modem "..laddr.." is already private")
+  return
+ else
+  cfg.private[#cfg.private+1] = laddr
+  privateModems[laddr] = true
+  saveconfig()
+ end
+end
+function unprivate(laddr)
+ laddr = completeModemSingle(laddr)
+ if not laddr then return end
+ if not privateModems[laddr] then
+  print("Modem "..laddr.." is already public")
+  return
+ else
+  for k,v in ipairs(cfg.private) do
+   if v == laddr then
+    table.remove(cfg.private, k)
+    break
+   end
+  end
+  privateModems[laddr] = nil
+  saveconfig()
+ end
 end
