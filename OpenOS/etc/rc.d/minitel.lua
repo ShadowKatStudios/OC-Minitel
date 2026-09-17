@@ -22,14 +22,12 @@ local serial = require "serialization"
 
 local hostname = computer.address():sub(1,8)
 local modems = {}
-local privateModems = {}
 
 cfg.debug = false
 cfg.port = 4096
 cfg.retry = 10
 cfg.retrycount = 3
 cfg.route = true
-cfg.private = {}
 
 --[[
 LKR format:
@@ -37,6 +35,7 @@ address {
  local hardware address
  remote hardware address
  time last received
+ vlan
 }
 ]]--
 cfg.sroutes = {}
@@ -60,41 +59,20 @@ local pqueue = {}
 local pcache = {}
 cfg.pctime = 30
 
+--[[
+vlans format:
+["address"] = {
+  [id] = false, -- no NAT
+  [id] = "suffix", -- NAT suffix
+  ...
+}
+]]
+cfg.vlans = {}
+
 local function dprint(...)
  if cfg.debug then
   print(...)
  end
-end
-
-local function completeModem(prefix)
- local candidates = {}
- local prefixLen = #prefix
- if prefixLen == 36 then
-  -- explicit UUID is provided, do not check whether it is currently present
-  return {prefix}
- end
- for _,modem in ipairs(modems) do
-  local laddr = modem.address
-  if laddr:sub(1,prefixLen) == prefix then
-   candidates[#candidates+1] = laddr
-  end
- end
- return candidates
-end
-
-local function completeModemSingle(prefix)
- local candidates = completeModem(prefix)
- if #candidates == 1 then
-  return candidates[1]
- elseif #candidates < 1 then
-  print("No matching modems")
- else
-  print("Candidate modems:")
-  for _,laddr in ipairs(candidates) do
-   print(laddr)
-  end
- end
- return nil
 end
 
 local function saveconfig()
@@ -110,23 +88,9 @@ local function loadconfig()
   local newcfg = serial.unserialize(f:read("*a"))
   f:close()
   for k,v in pairs(newcfg) do
-   if k == "sroutes" then
-    for to in pairs(cfg.sroutes) do
-     cfg.sroutes[to] = nil
-    end
-    for to,route in pairs(v) do
-     cfg.sroutes[to] = route
-    end
-   else
-    cfg[k] = v
-   end
+   cfg[k] = v
   end
-  for k in pairs(privateModems) do
-   privateModems[k] = nil
-  end
-  for _,laddr in ipairs(cfg.private) do
-   privateModems[laddr] = true
-  end
+  rcache = setmetatable(rcache,{__index=cfg.sroutes})
  else
   saveconfig()
  end
@@ -145,14 +109,16 @@ function start()
 
  modems={}
  for a,t in component.list("modem") do
-  modems[#modems+1] = component.proxy(a)
+  for vlan,suffix in pairs(cfg.vlans[a] or {[cfg.port]=false}) do
+   modems[#modems+1] = setmetatable({vlan=vlan,suffix=suffix or nil},{__index=component.proxy(a)})
+  end
  end
  for k,v in ipairs(modems) do
-  v.open(cfg.port)
-  print("Opened port "..cfg.port.." on "..v.address)
+  v.open(v.vlan)
+  print("Opened port "..v.vlan.." on "..v.address)
  end
  for a,t in component.list("tunnel") do
-  modems[#modems+1] = component.proxy(a)
+  modems[#modems+1] = setmetatable({vlan=0, suffix=((vlans[a] or {})[0] or {}).suffix},{__index=component.proxy(a)})
  end
  
  local function genPacketID()
@@ -163,38 +129,41 @@ function start()
   return npID
  end
 
- local function canUseModemFor(remoteHost,modemUUID)
-  if not privateModems[modemUUID] then
-   return true
+ local function checkVlan(addr,port)
+  for k,v in ipairs(modems) do
+   if v.address == addr and v.vlan == port then
+    return v
+   end
   end
-  if not cfg.sroutes[remoteHost] then
-   return false
-  end
-  return cfg.sroutes[remoteHost][1] == modemUUID
  end
  
  local function sendPacket(packetID,packetType,dest,sender,vPort,data,repeatingFrom)
   if rcache[dest] then
-   if rcache[dest][1] == repeatingFrom and packetType ~= 2 then
-    dprint("Cached", rcache[dest][1], "send", "Packet came in on the same interface we use to send, not forwarding")
-    return
-   end
-   dprint("Cached", rcache[dest][1],"send",rcache[dest][2],cfg.port,packetID,packetType,dest,sender,vPort,data)
-   if component.type(rcache[dest][1]) == "modem" then
-    component.invoke(rcache[dest][1],"send",rcache[dest][2],cfg.port,packetID,packetType,dest,sender,vPort,data)
-   elseif component.type(rcache[dest][1]) == "tunnel" then
-    component.invoke(rcache[dest][1],"send",packetID,packetType,dest,sender,vPort,data)
+   dprint("Cached", rcache[dest][1],"send",rcache[dest][2],rcache[dest][4],packetID,packetType,dest,sender,vPort,data)
+   -- strip NAT suffix for sending without messing with the cache
+   local vlan = checkVlan(rcache[dest][1], rcache[dest][4])
+   local ndest = (vlan and vlan.suffix and dest:sub(-#vlan.suffix) == vlan.suffix and dest:sub(1,#vlan.suffix-1)) or dest
+   if vlan ~= repeatingFrom or (vlan.type ~= "tunnel" and vlan.isWireless()) then
+    if vlan.type == "modem" then
+     vlan.send(rcache[dest][2],rcache[dest][4],packetID,packetType,ndest,sender,vPort,data)
+    elseif vlan.type == "tunnel" then
+     vlan.send(packetID,packetType,ndest,sender,vPort,data)
+    end
    end
   else
    dprint("Not cached", cfg.port,packetID,packetType,dest,sender,vPort,data)
    for k,v in pairs(modems) do
     -- do not send message back to the wired or linked modem it came from
     -- the check for tunnels is for short circuiting `v.isWireless()`, which does not exist for tunnels
-    if (v.address ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless())) and canUseModemFor(dest,v.address) then
+    if (v ~= repeatingFrom or (v.type ~= "tunnel" and v.isWireless()))
+    -- also, if a NAT suffix is set, check the packet matches before broadcasting
+    and (not v.suffix or dest:sub(-#v.suffix) == v.suffix) then
+     -- strip NAT suffix before broadcast
+     local ndest = (v.suffix and dest:sub(-#v.suffix) == v.suffix and dest:sub(1,#v.suffix-1)) or dest
      if v.type == "modem" then
-      v.broadcast(cfg.port,packetID,packetType,dest,sender,vPort,data)
+      v.broadcast(v.vlan,packetID,packetType,ndest,sender,vPort,data)
      elseif v.type == "tunnel" then
-      v.send(packetID,packetType,dest,sender,vPort,data)
+      v.send(packetID,packetType,ndest,sender,vPort,data)
      end
     end
    end
@@ -225,17 +194,20 @@ function start()
   end
   return false
  end
- 
+
  local function processPacket(_,localModem,from,pport,_,packetID,packetType,dest,sender,vPort,data)
   pruneCache()
-  if pport == cfg.port or pport == 0 then -- for linked cards
+  -- add the NAT suffix
+  local vlan = checkVlan(localModem, pport)
+  sender = sender..(vlan.suffix or "")
+  if vlan or pport == 0 then -- for linked cards
    dprint(cfg.port,vPort,packetType,dest)
-   if not canUseModemFor(sender,localModem) then return end
    if checkPCache(packetID) then return end
-   -- update the route cache on every packet received, not just the first time we've seen it since expiring the cache.
-   -- also moved it to before the ack-packets are sent out, which should help them to not flood the network with acks
-   dprint("rcache: "..sender..":", localModem,from,computer.uptime())
-   rcache[sender] = {localModem,from,computer.uptime()+cfg.rctime} 
+   -- add the packet ID to the pcache
+   pcache[packetID] = computer.uptime()+cfg.pctime
+   -- add the sender to the rcache
+   dprint("rcache: "..sender..":", localModem,from,computer.uptime(),vlan.vlan)
+   rcache[sender] = cfg.sroutes[sender] == nil and {localModem,from,computer.uptime()+cfg.rctime,vlan.vlan} or nil
    if dest == hostname then
     if packetType == 1 then
      sendPacket(genPacketID(),2,sender,hostname,vPort,packetID)
@@ -251,10 +223,7 @@ function start()
    elseif dest:sub(1,1) == "~" then -- broadcasts start with ~
     computer.pushSignal("net_broadcast",sender,vPort,data)
    elseif cfg.route then -- repeat packets if route is enabled
-    sendPacket(packetID,packetType,dest,sender,vPort,data,localModem)
-   end
-   if not pcache[packetID] then -- add the packet ID to the pcache
-    pcache[packetID] = computer.uptime()+cfg.pctime
+    sendPacket(packetID,packetType,dest,sender,vPort,data,vlan)
    end
   end
  end
@@ -329,10 +298,8 @@ function set(k,v)
  saveconfig()
 end
 
-function set_route(to,laddr,raddr)
- laddr = completeModemSingle(laddr)
- if not laddr then return end
- cfg.sroutes[to] = {laddr,raddr,0}
+function set_route(to,laddr,raddr, vlan)
+ cfg.sroutes[to] = {component.get(laddr, "modem") or component.get(laddr, "tunnel") or laddr,raddr,0,tonumber(vlan) or cfg.port}
  saveconfig()
 end
 function del_route(to)
@@ -340,8 +307,12 @@ function del_route(to)
  saveconfig()
 end
 function route()
+ print("Type\tDest\tInfo")
+ for k,v in pairs(cfg.sroutes) do
+  print("S",k,serial.serialize(v))
+ end
  for k,v in pairs(rcache) do
-  print(k,serial.serialize(v))
+  print("D",k,serial.serialize(v))
  end
 end
 function persist_route(to)
@@ -350,34 +321,23 @@ function persist_route(to)
   print("No cached route to "..tostring(to))
   return
  end
- set_route(to,entry[1],entry[2])
+ set_route(to,entry[1],entry[2],entry[4])
 end
-function private(laddr)
- laddr = completeModemSingle(laddr)
- if not laddr then return end
- if privateModems[laddr] then
-  print("Modem "..laddr.." is already private")
-  return
- else
-  cfg.private[#cfg.private+1] = laddr
-  privateModems[laddr] = true
-  saveconfig()
+
+function vlan()
+ for k,v in pairs(cfg.vlans) do
+  print(k,serial.serialize(v))
  end
 end
-function unprivate(laddr)
- laddr = completeModemSingle(laddr)
- if not laddr then return end
- if not privateModems[laddr] then
-  print("Modem "..laddr.." is already public")
-  return
- else
-  for k,v in ipairs(cfg.private) do
-   if v == laddr then
-    table.remove(cfg.private, k)
-    break
-   end
-  end
-  privateModems[laddr] = nil
-  saveconfig()
- end
+function set_vlan(addr, id, suffix)
+ addr = component.get(addr, "modem") or component.get(addr, "tunnel") or addr
+ cfg.vlans[addr] = cfg.vlans[addr] or {[cfg.port]=false}
+ cfg.vlans[addr][tonumber(id)] = suffix or false
+ saveconfig()
+end
+function del_vlan(addr, id)
+ addr = component.get(addr, "modem") or component.get(addr, "tunnel") or addr
+ cfg.vlans[addr] = cfg.vlans[addr] or {[cfg.port]=false}
+ cfg.vlans[addr][tonumber(id)] = nil
+ saveconfig()
 end
