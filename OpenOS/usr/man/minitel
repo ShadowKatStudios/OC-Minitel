@@ -37,7 +37,28 @@ To change a setting, one invokes:
 - route: whether to forward packets
 - debug: whether to output debugging info to the display
 
-In addition, one can invoke to get large amounts of debug output, *rc minitel set_route <hostname> <local_modem> <remote_modem>* to add a static route, and *rc minitel del_route <hostname>* to delete a static route.
+#### Static routes
+
+Static routes can be configured if one wants to avoid dynamic routing for a given host. There are several subcommands for the minitel daemon for this:
+
+- `rc minitel route` will show the current routing table.
+- `rc minitel set_route <destination> <local modem address> <next hop modem address> [VLAN]` will, as the name suggests, set the address any packets intended for *destination* will be forwarded to, and via which interface.
+- `rc minitel del_route <destination>` will delete the static route configuration for *host*.
+- `rc minitel persist_route <destination>` will save the current dynamic route to *destination* into the static route table.
+
+#### VLANs and VLAN suffixes
+Minitel implements VLANs using the "port" field of OpenComputers modems, allowing multiple interfaces per modem card, and routing between. Each VLAN interface can have a "suffix." VLAN suffixes are used to filter which packets are allowed to exit via a VLAN interface. If a suffix is configured, only traffic matching that suffix will be forwarded to that network, and the suffix will be stripped as it is. Additionally, any packets coming from a suffixed VLAN interface will have that suffix added before they are processed or forwarded.
+
+Potential uses for this could be dividing a large network into smaller ones to avoid more traffic than relays can handle, suffixing a wireless network or linked card to save power, or separating industrial control onto its own virtual network.
+
+The commands available for managing VLANs are:
+- `rc minitel vlan` will show the current VLAN configuration.
+- `rc minitel set_vlan <modem address> <VLAN ID> [suffix]` will change or add a VLAN configuration. Without a suffix argument it will just enable that VLAN.
+- `rc minitel del_vlan <modem address> <VLAN ID>` will remove a VLAN from the configuration.
+
+After setting or deleting a VLAN, the Minitel daemon must be restarted.
+
+The default VLAN ID for Minitel is 4096. Keep in mind that OpenComputers hardware only allows 16 open ports at a time with a default configuration (or one, with a T1 wireless card), and the linked card doesn't use ports at all, and the only VLAN ID that will work with those is 0.
 
 ### Events
 
