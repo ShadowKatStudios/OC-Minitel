@@ -26,7 +26,7 @@ function net.usend(to,port,data,npID)
 end
 
 function net.rsend(to,port,data,block)
- local pid, stime = net.genPacketID(), computer.uptime() + net.streamdelay
+ local pid, stime, rpid = net.genPacketID(), computer.uptime() + net.streamdelay
  computer.pushSignal("net_send",1,to,port,data,pid)
  if block then return pid end
  repeat
@@ -111,8 +111,7 @@ end
 
 function net.open(to,port)
  if not net.rsend(to,port,"openstream") then return false, "no ack from host" end
- local st = computer.uptime()+net.streamdelay
- local est = false
+ local st,est,from,rport,data,nport,sclose = computer.uptime()+net.streamdelay, false
  while true do
   _,from,rport,data = event.pull(net.streamdelay, "net_msg")
   if to == from and rport == port then
@@ -137,6 +136,7 @@ function net.open(to,port)
 end
 
 function net.listen(port)
+ local from, rport, data
  repeat
   _, from, rport, data = event.pull("net_msg")
  until rport == port and data == "openstream"
